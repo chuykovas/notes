@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Notes</title>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700|Old+Standard+TT&display=swap&subset=cyrillic" rel="stylesheet">
+    <link href="./styles/style.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/d1202ceea2.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <main class="content">
+        <div class="category-list">
+            <div class="category-list_header">
+                <img src="./assets/to-do-list.png" alt="logo" class="logo"/>
+                <h2>Notes</h2>
+            </div>
+            <form class="search-form">
+                <button class="search-button">
+                    <img src="./assets/search.png" alt="search-icon" class="search-icon" width="24" height="24"/>
+                </button>
+                <input class="search-input" type="search" placeholder="Поиск по категориям" />
+            </form>
+            <button class="add-category-button">
+                <img class="add-icon" src="./assets/add.png">
+                Добавить категорию
+            </button>
+            <div class="category-list_content"></div>
+        </div>
+        <div class="note-list"></div>
+        <div class="note-content"></div>
+    </main>
+
+</body>
+</html>
