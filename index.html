@@ -8,7 +8,7 @@
     <title>Notes</title>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700|Old+Standard+TT&display=swap&subset=cyrillic" rel="stylesheet">
     <link href="./styles/style.css" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/d1202ceea2.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
 </head>
 <body>
     <main class="content">
@@ -23,15 +23,74 @@
                 </button>
                 <input class="search-input" type="search" placeholder="Поиск по категориям" />
             </form>
-            <button class="add-category-button">
-                <img class="add-icon" src="./assets/add.png">
-                Добавить категорию
-            </button>
-            <div class="category-list_content"></div>
+            <div class="buttons-wrapper">
+                <button class="add-category-button category-button">
+                    <img class="add-icon" src="./assets/add.png" alt="Добавление категории" title="Добавление категории">
+                </button>
+                <button class="sort-category-button category-button">
+                    <img class="sort-icon" src="./assets/sort.png" alt="Сортировка категорий" title="Сортировка категорий">
+                </button>
+            </div>
+            <div class="category-list_content">
+                <div class="category">
+                    <h3 class="category-title">Без категории</h3>
+                    <p class="notes-count">Заметок: <span>4</span></p>
+                </div>
+                <div class="category">
+                    <h3 class="category-title">Без категории</h3>
+                    <p class="notes-count">Заметок: <span>4</span></p>
+                </div>
+                <div class="category">
+                    <h3 class="category-title">Без категории</h3>
+                    <p class="notes-count">Заметок: <span>4</span></p>
+                </div>
+                <div class="category">
+                    <h3 class="category-title">Без категории</h3>
+                    <p class="notes-count">Заметок: <span>4</span></p>
+                </div>
+                <div class="category">
+                    <h3 class="category-title">Без категории</h3>
+                    <p class="notes-count">Заметок: <span>4</span></p>
+                </div>
+                <div class="category">
+                    <h3 class="category-title">Без категории</h3>
+                    <p class="notes-count">Заметок: <span>4</span></p>
+                </div>
+                <div class="category">
+                    <h3 class="category-title">Без категории</h3>
+                    <p class="notes-count">Заметок: <span>4</span></p>
+                </div>
+                <div class="category">
+                    <h3 class="category-title">Без категории</h3>
+                    <p class="notes-count">Заметок: <span>4</span></p>
+                </div>
+                <div class="category">
+                    <h3 class="category-title">Без категории</h3>
+                    <p class="notes-count">Заметок: <span>4</span></p>
+                </div> <div class="category">
+                <h3 class="category-title">Без категории</h3>
+                <p class="notes-count">Заметок: <span>4</span></p>
+            </div>
+                <div class="category">
+                    <h3 class="category-title">Без категории</h3>
+                    <p class="notes-count">Заметок: <span>4</span></p>
+                </div> <div class="category">
+                <h3 class="category-title">Без категории</h3>
+                <p class="notes-count">Заметок: <span>4</span></p>
+            </div>
+                <div class="category">
+                    <h3 class="category-title">Без категории</h3>
+                    <p class="notes-count">Заметок: <span>4</span></p>
+                </div>
+                <div class="category">
+                    <h3 class="category-title">Без категории</h3>
+                    <p class="notes-count">Заметок: <span>4</span></p>
+                </div>
+            </div>
         </div>
         <div class="note-list"></div>
         <div class="note-content"></div>
     </main>
-
+    <script src="./scripts/app.js"></script>
 </body>
 </html>
