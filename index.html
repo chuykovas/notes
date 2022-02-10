@@ -8,6 +8,8 @@
     <title>Notes</title>
     <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700|Old+Standard+TT&display=swap&subset=cyrillic" rel="stylesheet">
     <link href="./styles/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/category.css">
+    <link rel="stylesheet" href="./styles/note.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
 </head>
 <body>
@@ -36,7 +38,7 @@
                     <h3 class="category-title">Без категории</h3>
                     <p class="notes-count">Заметок: <span>4</span></p>
                 </div>
-                <div class="category">
+         <!--       <div class="category">
                     <h3 class="category-title">Без категории</h3>
                     <p class="notes-count">Заметок: <span>4</span></p>
                 </div>
@@ -85,11 +87,37 @@
                 <div class="category">
                     <h3 class="category-title">Без категории</h3>
                     <p class="notes-count">Заметок: <span>4</span></p>
+                </div>-->
+            </div>
+        </div>
+        <div class="note-list">
+            <div class="note-list_header">
+                <form class="search-form">
+                    <button class="search-button">
+                        <img src="./assets/search.png" alt="search-icon" class="search-icon" width="24" height="24"/>
+                    </button>
+                    <input class="search-input" type="search" placeholder="Поиск по заметкам" />
+                </form>
+                <div class="buttons-wrapper">
+                    <button><i class="fas fa-sort-alpha-down"></i></button>
+                    <button><i class="fas fa-sort-numeric-down"></i></button>
+                    <button><i class="fas fa-edit"></i></i></button>
+                    <button><i class="fas fa-trash-alt"></i></i></button>
+                    <button><i class="fas fa-plus-circle"></i></i></button>
+                </div>
+            </div>
+            <div class="note-list_content">
+                <div class="note">
+                    <h3 class="note-title">Заметка 1</h3>
+                    <p class="note-date">21.02.2022</p>
+                    <p class="note-description">Ботинки горные - обязательно.  Кошки есть и мягкие и с креплением на рант. Вес рюкзака мужского -28-30 кг, женский - 25, кг . Оплатить можно одним платежом ,</p>
                 </div>
             </div>
         </div>
-        <div class="note-list"></div>
-        <div class="note-content"></div>
+        <div class="note-content">
+            <div class="note-content_title" contenteditable="true">Название</div>
+            <div class="note-content_text" contenteditable="true">Текст</div>
+        </div>
     </main>
     <script src="./scripts/app.js"></script>
 </body>

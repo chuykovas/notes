@@ -23,7 +23,7 @@ body, button, input {
     padding: 10px;
     display: flex;
     flex-direction: column;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .category-list_header{
@@ -95,40 +95,20 @@ body, button, input {
 .add-icon{
     opacity: 0.5;
 }
-.category{
-    position: relative;
-    margin-bottom: 10px;
-    padding: 10px;
-    background: #90929e;
-    border-radius: 10px;
-}
-.category::after{
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    content: "\f2ed";
-    font-family: "Font Awesome 5 Free";
-    font-weight: 900;
-    color: #4e5560;
-}
-.category::before{
-    position: absolute;
-    top: 10px;
-    right: 30px;
-    content: "\f044";
-    font-family: "Font Awesome 5 Free";
-    font-weight: 900;
-    color: #4e5560;
-}
-.category:hover{
-    background: #717381;
-    opacity: 0.7;
-}
-.category.checked{
-    background: #717381;
-}
+
 .note-list{
     width: 30%;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
     border-right: 2px solid #BDBDBD;
+}
+.note-list_header{
+    display: flex;
+    justify-content: space-between;
+}
+.note-content{
+    padding: 10px;
 }
 
