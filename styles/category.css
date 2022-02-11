@@ -30,3 +30,14 @@
 .category.checked{
     background: #717381;
 }
+.add-name-input{
+    width: 70%;
+    background-color: transparent;
+    border: 1px solid #222222;
+    padding: 10px 5px;
+}
+.add-name-category-button{
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: #4e5560;
+}
