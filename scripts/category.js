@@ -1,4 +1,5 @@
-import {createElement} from './util'
+import {createElement} from './util';
+
 
 function Category(params) {
   this.onDelete = params.onDelete;
@@ -12,38 +13,62 @@ function Category(params) {
 }
 
 function handlerClickEdit() {
+  const popupInputText = createElement('input', {
+    className: 'popup-input',
+    type: 'text',
+    placeholder: 'Введите название'
+  });
+  const acceptButton = createElement('button', {
+    className: 'popup-button', onclick: (event) => {
+      event.preventDefault();
+      this.rename(popupInputText.value || this.state.title);
+      popupWrapper.remove();
+    }
+  }, 'Принять');
+  const cancelButton = createElement('button', {
+    className: 'popup-button',
+    onclick: (event) => {
+      event.preventDefault();
+      popupWrapper.remove();
+    }
+  }, 'Отменить');
+  const popup = createElement('form', {className: 'popup-form'}, popupInputText, acceptButton, cancelButton);
+  const popupWrapper = createElement('div', {className: 'popup-wrapper'}, popup);
 
+  document.body.append(popupWrapper);
 }
 
 Category.prototype.delete = function () {
   this.htmlContainer.remove();
-
 }
 
 Category.prototype.rename = function (newName) {
   this.state.title = newName;
-  this.htmlContainer = this.render();
+  this.htmlContainer.firstChild.textContent = this.state.title;
 }
 
 Category.prototype.render = function () {
-  const category = createElement('div', {name: 'className', value: 'category'});
-  const categoryTitle = createElement('h3', {name: 'className', value: 'category-title'},
-                                            {name: 'textContent', value: this.state.title});
-  const noteCount = createElement('p', {name: 'className', value: 'notes-count'},
-                                       {name: 'textContent', value: this.state.notes.length || 0});
-  const menuButton = createElement('button', {name: 'className', value: 'kebab-menu-button'},
-                                             {name: 'onclick', value: () => kebabMenu.classList.toggle('active')});
 
-  const kebabMenu = createElement('ul', {name: 'className', value: 'kebab-menu'});
-  const kebabMenuButtonEdit = createElement('li', {name: 'className', value: 'kebab-menu-item'},
-                                                  {name: 'textContent', value: 'Редактировать'});
-  const kebabMenuButtonDelete = createElement('li', {name: 'className', value: 'kebab-menu-item'},
-                                                    {name: 'textContent', value: 'Удалить'},
-                                                    {name: 'onclick', value: () => this.delete()});
+  const categoryTitle = createElement('h3', {className: 'category-title'}, this.state.title);
+  const noteCount = createElement('p', {className: 'notes-count'}, String(this.state.notes.length));
+  const menuButton = createElement('button', {
+    className: 'kebab-menu-button',
+    onclick: () => kebabMenu.classList.toggle('active')
+  });
+  const kebabMenuButtonEdit = createElement('li', {
+    className: 'kebab-menu-item',
+    onclick: () => handlerClickEdit.bind(this)()
+  }, 'Редактировать');
+  const kebabMenuButtonDelete = createElement('li', {
+    className: 'kebab-menu-item',
+    onclick: () => this.delete()
+  }, 'Удалить');
+  const kebabMenu = createElement('ul', {className: 'kebab-menu'}, kebabMenuButtonEdit, kebabMenuButtonDelete);
 
-  kebabMenu.append(kebabMenuButtonEdit, kebabMenuButtonDelete);
-
-  category.append(categoryTitle, noteCount, menuButton,kebabMenu);
+  const category = createElement('div', {
+    className: 'category',
+    onclick: () => category.classList.toggle('checked')
+  }, categoryTitle, noteCount, menuButton, kebabMenu);
 
   return category;
 }
