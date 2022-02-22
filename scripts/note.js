@@ -1,4 +1,5 @@
 import {createElement} from './util';
+import Category from './category';
 
 export default function Note(params) {
   this.state = {
@@ -6,6 +7,17 @@ export default function Note(params) {
     date: params.date,
   };
   this.htmlContainer = this.render();
+}
+
+Note.prototype.init = function () {
+  this.elements = {
+    noteContent: document.querySelector('.note-content'),
+  }
+  const noteContent = this.renderNoteContent();
+
+  this.elements.noteContent.lastChild.remove();
+
+  this.elements.noteContent.append(noteContent);
 }
 
 Note.prototype.delete = function () {
@@ -18,10 +30,12 @@ Note.prototype.render = function () {
     className: 'note-title',
     textContent: this.state.content.title || 'Заметка без названия'
   });
+
   const dateNote = createElement('span', {
     className: 'note-date',
     textContent: `${this.state.date}`
   });
+
   const shortDescription = createElement('p', {
     className: 'note-description',
     textContent: this.state.content.text || ''
@@ -29,8 +43,15 @@ Note.prototype.render = function () {
 
   shortDescription.prepend(dateNote);
 
-  const deleteButton = createElement('button', {className: 'delete-note-button'});
-  const note = createElement('div', {className: 'note'});
+  const deleteButton = createElement('button', {
+    className: 'delete-note-button',
+    onclick: () => this.delete()
+  });
+
+  const note = createElement('div', {
+    className: 'note',
+    onclick: () => this.init()
+  });
 
   note.append(titleNote, shortDescription, deleteButton);
 
@@ -40,7 +61,7 @@ Note.prototype.render = function () {
 Note.prototype.renderNoteContent = function () {
   const noteDate = createElement('div', {
     className: 'note-content-date',
-    textContent: `${dateNow}`
+    textContent: `${this.state.date}`
   });
 
   const noteTitleInput = createElement('div', {

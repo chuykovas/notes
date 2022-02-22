@@ -43,6 +43,7 @@ App.prototype.init = function () {
       const newNote = new Note({date: getDate()});
       selectedCategory.addNote(newNote);
       selectedCategory.renderNewNote();
+      newNote.init();
     }
   });
 

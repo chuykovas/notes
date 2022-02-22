@@ -60,6 +60,7 @@ App.prototype.init = function () {
       const newNote = new _note__WEBPACK_IMPORTED_MODULE_1__["default"]({date: (0,_util__WEBPACK_IMPORTED_MODULE_2__.getDate)()});
       selectedCategory.addNote(newNote);
       selectedCategory.renderNewNote();
+      newNote.init();
     }
   });
 
@@ -258,6 +259,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ Note)
 /* harmony export */ });
 /* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./util */ "./scripts/util.js");
+/* harmony import */ var _category__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./category */ "./scripts/category.js");
+
 
 
 function Note(params) {
@@ -266,6 +269,17 @@ function Note(params) {
     date: params.date,
   };
   this.htmlContainer = this.render();
+}
+
+Note.prototype.init = function () {
+  this.elements = {
+    noteContent: document.querySelector('.note-content'),
+  }
+  const noteContent = this.renderNoteContent();
+
+  this.elements.noteContent.lastChild.remove();
+
+  this.elements.noteContent.append(noteContent);
 }
 
 Note.prototype.delete = function () {
@@ -278,10 +292,12 @@ Note.prototype.render = function () {
     className: 'note-title',
     textContent: this.state.content.title || 'Заметка без названия'
   });
+
   const dateNote = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('span', {
     className: 'note-date',
     textContent: `${this.state.date}`
   });
+
   const shortDescription = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('p', {
     className: 'note-description',
     textContent: this.state.content.text || ''
@@ -289,8 +305,15 @@ Note.prototype.render = function () {
 
   shortDescription.prepend(dateNote);
 
-  const deleteButton = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('button', {className: 'delete-note-button'});
-  const note = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {className: 'note'});
+  const deleteButton = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('button', {
+    className: 'delete-note-button',
+    onclick: () => this.delete()
+  });
+
+  const note = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
+    className: 'note',
+    onclick: () => this.init()
+  });
 
   note.append(titleNote, shortDescription, deleteButton);
 
@@ -300,7 +323,7 @@ Note.prototype.render = function () {
 Note.prototype.renderNoteContent = function () {
   const noteDate = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
     className: 'note-content-date',
-    textContent: `${dateNow}`
+    textContent: `${this.state.date}`
   });
 
   const noteTitleInput = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {

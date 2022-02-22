@@ -104,7 +104,6 @@ body, button, input {
   padding: 10px;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
   border-right: 2px solid #BDBDBD;
 }
 
@@ -114,6 +113,9 @@ body, button, input {
   flex-wrap: wrap;
   margin-bottom: 5px;
   border-bottom: 1px solid #ccc;
+}
+.note-list_content{
+  overflow-y: auto;
 }
 .add-new-note{
   display: flex;
@@ -127,6 +129,8 @@ body, button, input {
 }
 
 .note-content {
+  display: flex;
+  flex-direction: column;
   width: 55%;
   padding: 10px;
 }
@@ -137,6 +141,7 @@ body, button, input {
 
 .note-content-body{
   padding: 10px;
+  overflow-y: auto;
 }
 
 .content-for-mobile {

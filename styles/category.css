@@ -39,6 +39,7 @@
   border: none;
   background: transparent;
   cursor: pointer;
+  transition: all 0.25s ease-out;
 }
 .content .kebab-menu-button:before{
   content: '\f142';
