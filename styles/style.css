@@ -122,6 +122,8 @@ body, button, input {
 }
 .add-new-note-text{
   padding-left: 5px;
+  user-select: none;
+  cursor: pointer;
 }
 
 .note-content {
@@ -130,6 +132,11 @@ body, button, input {
 }
 .note-content-header{
   min-height: 65px;
+  border-bottom: 1px solid #ccc;
+}
+
+.note-content-body{
+  padding: 10px;
 }
 
 .content-for-mobile {

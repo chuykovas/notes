@@ -1,71 +1,63 @@
 <!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Notes</title>
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700|Old+Standard+TT&display=swap&subset=cyrillic" rel="stylesheet">
-    <link href="./styles/style.css" rel="stylesheet">
-    <link rel="stylesheet" href="./styles/category.css">
-    <link rel="stylesheet" href="./styles/note.css">
-    <link rel="stylesheet" href="./styles/popup.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Notes</title>
+  <link
+      href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700|Old+Standard+TT&display=swap&subset=cyrillic"
+      rel="stylesheet">
+  <link href="./styles/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="./styles/category.css">
+  <link rel="stylesheet" href="./styles/note.css">
+  <link rel="stylesheet" href="./styles/popup.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
 </head>
 <body>
-    <main class="content">
-        <div class="category-list">
-            <div class="buttons-wrapper">
-                <button class="sort-category-button category-button"><i class="fas fa-sort-alpha-down"></i></button>
-            </div>
-            <div class="category-list_content">
-
-            </div>
-            <form class="add-category-form">
-                <button class="add-button"><i class="fas fa-plus-circle"></i></button>
-                <input type="text" name="add-category-input" class="add-category-input" placeholder="Новая категория"/>
-            </form>
-        </div>
-        <div class="note-list">
-            <div class="note-list_header">
-                <form class="search-form">
-                    <button class="search-button">
-                        <img src="./assets/search.png" alt="search-icon" class="search-icon" width="24" height="24"/>
-                    </button>
-                    <input class="search-input" type="search" placeholder="Поиск по заметкам" />
-                </form>
-                <div class="buttons-wrapper">
-                    <button><i class="fas fa-sort-alpha-down"></i></button>
-                    <button><i class="fas fa-sort-numeric-down"></i></button>
-                </div>
-            </div>
-            <div class="note-list_content">
-
-            </div>
-            <div class="add-new-note">
-                <button class="add-button"><i class="fas fa-plus-circle"></i></button>
-                <p class="add-new-note-text">Новая заметка</p>
-            </div>
-        </div>
-        <div class="note-content">
-            <div class="note-content-header">
-                <div class="buttons-wrapper">
-                    <button class="sort-category-button category-button"><i class="fas fa-paperclip"></i></button>
-                </div>
-            </div>
-            <div class="note-content-body">
-                <div class="note-content-date">12.02.2022 в 11:45</div>
-                <div class="note-content-title" contenteditable="true">Название</div>
-                <div class="note-content-text" contenteditable="true">Текст</div>
-            </div>
-
-        </div>
-    </main>
-    <div class="content-for-mobile">
-        <p>Откройте с компьютера</p>
-        <p>Мобильная версия на стадии разработки. Приносим свои извинения)</p>
+<main class="content">
+  <div class="category-list">
+    <div class="buttons-wrapper">
+      <button class="sort-category-button category-button"><i class="fas fa-sort-alpha-down"></i></button>
     </div>
-    <script src="./scripts/bundle.js"></script>
+    <div class="category-list_content" id="listCategory"></div>
+    <form class="add-category-form" id="createCategoryForm">
+      <button class="add-button"><i class="fas fa-plus-circle"></i></button>
+      <input type="text" name="nameCategory" class="add-category-input" placeholder="Новая категория"/>
+    </form>
+  </div>
+  <div class="note-list" >
+    <div class="note-list_header">
+      <form class="search-form">
+        <button class="search-button">
+          <img src="./assets/search.png" alt="search-icon" class="search-icon" width="24" height="24"/>
+        </button>
+        <input class="search-input" type="search" placeholder="Поиск по заметкам"/>
+      </form>
+      <div class="buttons-wrapper">
+        <button><i class="fas fa-sort-alpha-down"></i></button>
+        <button><i class="fas fa-sort-numeric-down"></i></button>
+      </div>
+    </div>
+    <div class="note-list_content" id="noteList"></div>
+    <div class="add-new-note">
+      <button class="add-button"><i class="fas fa-plus-circle"></i></button>
+      <p class="add-new-note-text">Новая заметка</p>
+    </div>
+  </div>
+  <div class="note-content">
+    <div class="note-content-header">
+      <div class="buttons-wrapper">
+        <button class="sort-category-button category-button"><i class="fas fa-paperclip"></i></button>
+      </div>
+    </div>
+  </div>
+</main>
+<div class="content-for-mobile">
+  <p>Откройте с компьютера</p>
+  <p>Мобильная версия на стадии разработки. Приносим свои извинения)</p>
+</div>
+<script src="./scripts/bundle.js"></script>
 </body>
 </html>

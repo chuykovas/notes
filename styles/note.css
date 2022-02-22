@@ -1,5 +1,6 @@
 .note{
     position: relative;
+    margin-bottom: 10px;
     padding: 10px;
     background: transparent;
     border-radius: 10px;
@@ -13,20 +14,27 @@
 .note-date{
     font-weight: 500;
 }
-.note-description{
-    color: #5d5d5d;
+
+.delete-note-button:before{
+    content: '\f2ed';
+    font-family: "Font Awesome 5 Free";
+    font-weight: bold;
 }
-.note-content-date{
-    text-align: center;
-}
-.note .kebab-menu-button{
+.note .delete-note-button{
     position: absolute;
     top: 50%;
     right: 10px;
     transform: translateY(-50%);
 }
-.note:hover .kebab-menu-button{
+.note:hover .delete-note-button{
     display: block;
+}
+
+.note-description{
+    color: #5d5d5d;
+}
+.note-content-date{
+    text-align: center;
 }
 
 .note-content-title{
