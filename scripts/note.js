@@ -12,11 +12,10 @@ export default function Note(params) {
 Note.prototype.init = function () {
   this.elements = {
     noteContent: document.querySelector('.note-content'),
-  }
+  };
   const noteContent = this.renderNoteContent();
 
   this.elements.noteContent.lastChild.remove();
-
   this.elements.noteContent.append(noteContent);
 }
 

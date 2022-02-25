@@ -17,7 +17,8 @@ Category.prototype.init = function () {
   this.elements = {
     listNote: document.getElementById('noteList'),
   };
-  const watchedState = onChange(this.state, (value) => render(value));
+  this.watchedState = onChange(this.state, (value) => this.htmlContainer = this.renderCategory());
+
   this.renderAllNote();
 }
 
@@ -132,13 +133,11 @@ Category.prototype.renderCategory = function () {
 Category.prototype.renderNewNote = function () {
   const note = this.state.notes[0];
   this.elements.listNote.prepend(note.htmlContainer);
-
-  //меняем количество заметок в категории
-  this.htmlContainer.children[1].textContent = this.state.notes.length;
 }
 
 Category.prototype.renderAllNote = function () {
   this.elements.listNote.innerHTML = '';
+
   if(this.state.notes.length === 0){
     this.elements.listNote.prepend(`В категории ${this.state.title} заметок нет`);
   } else {
