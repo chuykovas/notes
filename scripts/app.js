@@ -1,7 +1,7 @@
 import Category from './category';
-import Note from './note';
-import {createElement, getDate, compareCategoryName} from './util';
+import {createElement, getDate, compare, loadPicture} from './util';
 import i18next from 'i18next';
+import DataBase from './indexedDB';
 
 export default function App() {
   this.state = {
@@ -22,8 +22,14 @@ App.prototype.init = function () {
       sortCategory: document.getElementById('sortCategory'),
       switchRussianLanguage: document.getElementById('ru'),
       switchEnglichLanguage: document.getElementById('en'),
+      addImageToNote: document.getElementById('addImage'),
+      sortByDate: document.getElementById('sortByDate'),
+      sortByName: document.getElementById('sortByName'),
     },
   }
+
+  const dataBase = new DataBase();
+  dataBase.init();
 
   this.elements.forms.createCategoryForm.addEventListener('submit', event => {
     event.preventDefault();
@@ -35,8 +41,8 @@ App.prototype.init = function () {
       title: nameCategory || 'Без имени',
       onClick: (category) => {
         this.state.selectedCategory = category;
-        this.state.selectedCategory.htmlContainer.classList.add('checked');
-        category.init();
+        // this.state.selectedCategory.htmlContainer.classList.add('checked');
+        this.state.selectedCategory.init();
       }
     });
     this.state.categories.unshift(category);
@@ -44,26 +50,28 @@ App.prototype.init = function () {
   });
 
   this.elements.buttons.createNoteButton.addEventListener('click', () => {
-    const selectedCategory = this.state.selectedCategory;
-    if (selectedCategory) {
-      const newNote = new Note({date: getDate()});
-      selectedCategory.addNote(newNote);
-      selectedCategory.renderNewNote();
-      //меняем количество заметок в категории
-      selectedCategory.htmlContainer.children[1].textContent = selectedCategory.state.notes.length;
-      newNote.init();
+    if (this.state.selectedCategory) {
+      this.state.selectedCategory.createNewNote();
     }
   });
 
   this.elements.buttons.sortCategory.addEventListener('click', () => {
     if (this.state.sortedCategory) {
-      this.state.categories.sort(compareCategoryName('title','descending'));
-      this.state.sortedCategory = false;
+      this.state.categories.sort(compare('title', 'descending'));
     } else {
-      this.state.categories.sort(compareCategoryName('title'));
-      this.state.sortedCategory = true;
+      this.state.categories.sort(compare('title'));
     }
+    this.state.sortedCategory = !this.state.sortedCategory;
     this.fullRender();
+  });
+
+  this.elements.buttons.sortByDate.addEventListener('click', () => this.state.selectedCategory.sortNote('date'));
+  this.elements.buttons.sortByName.addEventListener('click', () => this.state.selectedCategory.sortNote('title'));
+
+  this.elements.buttons.addImageToNote.addEventListener('change', (event) => {
+    const image = createElement('img', {src: `${loadPicture(event.target)}`});
+    this.state.selectedCategory.state.selectedNote.addImage(image);
+    // console.log(this.state.selectedCategory.selectedNote);
   });
 
   this.elements.buttons.switchEnglichLanguage.addEventListener('click', () => i18next.changeLanguage('en'));

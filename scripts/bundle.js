@@ -13,9 +13,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ App)
 /* harmony export */ });
 /* harmony import */ var _category__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./category */ "./scripts/category.js");
-/* harmony import */ var _note__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./note */ "./scripts/note.js");
-/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./util */ "./scripts/util.js");
-/* harmony import */ var i18next__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! i18next */ "./node_modules/i18next/dist/esm/i18next.js");
+/* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./util */ "./scripts/util.js");
+/* harmony import */ var i18next__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! i18next */ "./node_modules/i18next/dist/esm/i18next.js");
+/* harmony import */ var _indexedDB__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./indexedDB */ "./scripts/indexedDB.js");
 
 
 
@@ -40,8 +40,14 @@ App.prototype.init = function () {
       sortCategory: document.getElementById('sortCategory'),
       switchRussianLanguage: document.getElementById('ru'),
       switchEnglichLanguage: document.getElementById('en'),
+      addImageToNote: document.getElementById('addImage'),
+      sortByDate: document.getElementById('sortByDate'),
+      sortByName: document.getElementById('sortByName'),
     },
   }
+
+  const dataBase = new _indexedDB__WEBPACK_IMPORTED_MODULE_3__["default"]();
+  dataBase.init();
 
   this.elements.forms.createCategoryForm.addEventListener('submit', event => {
     event.preventDefault();
@@ -53,8 +59,8 @@ App.prototype.init = function () {
       title: nameCategory || 'Без имени',
       onClick: (category) => {
         this.state.selectedCategory = category;
-        this.state.selectedCategory.htmlContainer.classList.add('checked');
-        category.init();
+        // this.state.selectedCategory.htmlContainer.classList.add('checked');
+        this.state.selectedCategory.init();
       }
     });
     this.state.categories.unshift(category);
@@ -62,30 +68,32 @@ App.prototype.init = function () {
   });
 
   this.elements.buttons.createNoteButton.addEventListener('click', () => {
-    const selectedCategory = this.state.selectedCategory;
-    if (selectedCategory) {
-      const newNote = new _note__WEBPACK_IMPORTED_MODULE_1__["default"]({date: (0,_util__WEBPACK_IMPORTED_MODULE_2__.getDate)()});
-      selectedCategory.addNote(newNote);
-      selectedCategory.renderNewNote();
-      //меняем количество заметок в категории
-      selectedCategory.htmlContainer.children[1].textContent = selectedCategory.state.notes.length;
-      newNote.init();
+    if (this.state.selectedCategory) {
+      this.state.selectedCategory.createNewNote();
     }
   });
 
   this.elements.buttons.sortCategory.addEventListener('click', () => {
     if (this.state.sortedCategory) {
-      this.state.categories.sort((0,_util__WEBPACK_IMPORTED_MODULE_2__.compareCategoryName)('title','descending'));
-      this.state.sortedCategory = false;
+      this.state.categories.sort((0,_util__WEBPACK_IMPORTED_MODULE_1__.compare)('title', 'descending'));
     } else {
-      this.state.categories.sort((0,_util__WEBPACK_IMPORTED_MODULE_2__.compareCategoryName)('title'));
-      this.state.sortedCategory = true;
+      this.state.categories.sort((0,_util__WEBPACK_IMPORTED_MODULE_1__.compare)('title'));
     }
+    this.state.sortedCategory = !this.state.sortedCategory;
     this.fullRender();
   });
 
-  this.elements.buttons.switchEnglichLanguage.addEventListener('click', () => i18next__WEBPACK_IMPORTED_MODULE_3__["default"].changeLanguage('en'));
-  this.elements.buttons.switchRussianLanguage.addEventListener('click', () => i18next__WEBPACK_IMPORTED_MODULE_3__["default"].changeLanguage('ru'));
+  this.elements.buttons.sortByDate.addEventListener('click', () => this.state.selectedCategory.sortNote('date'));
+  this.elements.buttons.sortByName.addEventListener('click', () => this.state.selectedCategory.sortNote('title'));
+
+  this.elements.buttons.addImageToNote.addEventListener('change', (event) => {
+    const image = (0,_util__WEBPACK_IMPORTED_MODULE_1__.createElement)('img', {src: `${(0,_util__WEBPACK_IMPORTED_MODULE_1__.loadPicture)(event.target)}`});
+    this.state.selectedCategory.state.selectedNote.addImage(image);
+    // console.log(this.state.selectedCategory.selectedNote);
+  });
+
+  this.elements.buttons.switchEnglichLanguage.addEventListener('click', () => i18next__WEBPACK_IMPORTED_MODULE_2__["default"].changeLanguage('en'));
+  this.elements.buttons.switchRussianLanguage.addEventListener('click', () => i18next__WEBPACK_IMPORTED_MODULE_2__["default"].changeLanguage('ru'));
 
   this.fullRender();
 }
@@ -122,11 +130,15 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 function Category(params) {
   this.state = {
+    id: Date.now(),
     title: params.title,
     notes: [],
     onClick: params.onClick,
+    sortedNote: false,
+    selectedNote: null,
   };
 
   this.htmlContainer = this.renderCategory();
@@ -136,9 +148,10 @@ Category.prototype.init = function () {
   this.elements = {
     listNote: document.getElementById('noteList'),
   };
-  this.watchedState = (0,on_change__WEBPACK_IMPORTED_MODULE_2__["default"])(this.state, (value) => this.htmlContainer = this.renderCategory());
 
-  this.renderAllNote();
+  // this.watchedState = onChange(this.state, (value) => this.htmlContainer = this.renderCategory());
+  // this.elements.listNote.innerHTML = '';
+    this.renderAllNote();
 }
 
 Category.prototype.delete = function () {
@@ -158,6 +171,34 @@ Category.prototype.rename = function (newName) {
 
 Category.prototype.addNote = function (note) {
   this.state.notes.unshift(note);
+}
+
+Category.prototype.createNewNote = function () {
+  const newNote = new _note__WEBPACK_IMPORTED_MODULE_1__["default"]({
+    date: (0,_util__WEBPACK_IMPORTED_MODULE_0__.getDate)(),
+    onClick: (note) => {
+      this.state.selectedNote = note;
+      this.state.selectedNote.init();
+    },
+  });
+  // this.elements.listNote.innerHTML = '';
+  this.addNote(newNote);
+  this.renderNewNote();
+  this.renderAllNote();
+  //меняем количество заметок в категории
+  this.htmlContainer.children[1].textContent = this.state.notes.length;
+}
+
+Category.prototype.sortNote = function (sortField){
+  console.log(sortField);
+  if (this.state.sortedNote) {
+    this.state.notes.sort((0,_util__WEBPACK_IMPORTED_MODULE_0__.compare)(sortField, 'descending'));
+  } else {
+    this.state.notes.sort((0,_util__WEBPACK_IMPORTED_MODULE_0__.compare)(sortField));
+  }
+  this.state.sortedNote = !this.state.sortedNote;
+
+  this.renderAllNote();
 }
 
 Category.prototype.renderPopup = function () {
@@ -251,22 +292,114 @@ Category.prototype.renderCategory = function () {
 
 Category.prototype.renderNewNote = function () {
   const note = this.state.notes[0];
-  this.elements.listNote.prepend(note.htmlContainer);
+  // this.elements.listNote.prepend(note.htmlContainer);
 }
 
 Category.prototype.renderAllNote = function () {
   this.elements.listNote.innerHTML = '';
-
-  if(this.state.notes.length === 0){
+  if(!this.state.notes.length){
     this.elements.listNote.prepend(`В категории ${this.state.title} заметок нет`);
   } else {
     const notes = this.state.notes.map(item => item.htmlContainer);
     this.elements.listNote.prepend(...notes);
   }
+
 }
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Category);
 
+
+/***/ }),
+
+/***/ "./scripts/indexedDB.js":
+/*!******************************!*\
+  !*** ./scripts/indexedDB.js ***!
+  \******************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+function DataBase() {
+  this.db = null;
+
+  this.init = function () {
+    let request = indexedDB.open('Notes', 1);
+
+    request.onupgradeneeded = function (e) {
+      this.db = e.target.result;
+      if (!this.db.objectStoreNames.contains('categories')) {
+        let categories = this.db.createObjectStore('categories');
+      }
+    }
+
+    request.onerror = function () {
+      console.log("Error", request.error);
+    }
+
+    request.onsuccess = function (e) {
+      this.db = e.target.result;
+      console.log("Подключение прошло успешно!");
+    }
+  }
+
+  this.add = function (item) {
+    let transaction = this.db.transaction(['categories'], 'readwrite');
+    let store = transaction.objectStore('categories');
+
+    const category = {title: item.title, noteList: item.notes};
+
+    store.add(category, item.id);
+
+    transaction.onsuccess = () => {
+      console.log("Запись успещно завершена");
+    }
+
+    transaction.onerror = () => {
+      console.log('Ошибка записи в базу');
+    }
+  }
+
+  this.load = function () {
+    let transaction = db.transaction(['categories'], 'readonly');
+    let store = transaction.objectStore("categories");
+
+    let request = store.openCursor();
+
+    request.onsuccess = function () {
+      let cursor = request.result;
+      if (cursor) {
+        let value = cursor.value.data.text;
+        console.log(value);
+        outputDiv.innerHTML += value;
+        cursor.continue();
+      }
+    };
+  }
+
+  this.delete = function (id) {
+    const transaction = this.db.transaction(['categories'], 'readwrite');
+
+    transaction.oncomplete = (event) => {
+      console.log('Transaction completed.')
+      getAndDisplayNotes(db);
+    };
+    transaction.onerror = function (event) {
+      console.log('Ошибка удаления записи');
+    };
+
+    const store = transaction.objectStore('categories');
+    const deleteRequest = store.delete(id);
+
+    deleteRequest.onsuccess = (event) => {
+      // обрабатываем успех нашего запроса на удаление
+      console.log('Delete request successful')
+    };
+  }
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (DataBase);
 
 /***/ }),
 
@@ -287,31 +420,37 @@ __webpack_require__.r(__webpack_exports__);
 
 function Note(params) {
   this.state = {
-    content: [],
+    title: ``,
+    content: ``,
     date: params.date,
+    onClick: params.onClick,
   };
   this.htmlContainer = this.render();
+  this.noteContent = this.renderNoteContent();
 }
 
 Note.prototype.init = function () {
   this.elements = {
-    noteContent: document.querySelector('.note-content'),
+    contentContainer: document.querySelector('.note-content-container'),
   };
-  const noteContent = this.renderNoteContent();
 
-  this.elements.noteContent.lastChild.remove();
-  this.elements.noteContent.append(noteContent);
+  this.elements.contentContainer.innerHTML = '';
+  this.elements.contentContainer.append(this.noteContent);
 }
 
 Note.prototype.delete = function () {
   this.htmlContainer.remove();
-  this.state = {};
+  this.noteContent.remove();
+}
+
+Note.prototype.addImage = function (image) {
+  this.state.content += `${image}`;
 }
 
 Note.prototype.render = function () {
   const titleNote = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('h3', {
     className: 'note-title',
-    textContent: this.state.content.title || 'Заметка без названия'
+    textContent: this.state.title || 'Заметка без названия'
   });
 
   const dateNote = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('span', {
@@ -321,7 +460,7 @@ Note.prototype.render = function () {
 
   const shortDescription = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('p', {
     className: 'note-description',
-    textContent: this.state.content.text || ''
+    textContent: this.state.content || 'Нет текста'
   });
 
   shortDescription.prepend(dateNote);
@@ -333,7 +472,7 @@ Note.prototype.render = function () {
 
   const note = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
     className: 'note',
-    onclick: () => this.init()
+    onclick: () => this.state.onClick(this),
   });
 
   note.append(titleNote, shortDescription, deleteButton);
@@ -350,13 +489,21 @@ Note.prototype.renderNoteContent = function () {
   const noteTitleInput = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
     className: 'note-content-title',
     contentEditable: 'true',
-    textContent: 'Название заметки'
+    textContent: this.state.title || 'Название заметки',
+    oninput: (event) => {
+      this.state.title = event.target.textContent;
+      this.htmlContainer = this.render();
+    }
   });
 
   const noteTextInput = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
     className: 'note-content-text',
     contentEditable: 'true',
-    textContent: 'Название заметки'
+    textContent: this.state.content || 'Текст заметки',
+    oninput: (event) => {
+      this.state.content = event.target.innerHTML;
+      this.htmlContainer = this.render();
+    }
   });
 
   const noteContentWrapper = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
@@ -382,7 +529,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "createElement": () => (/* binding */ createElement),
 /* harmony export */   "getDate": () => (/* binding */ getDate),
-/* harmony export */   "compareCategoryName": () => (/* binding */ compareCategoryName)
+/* harmony export */   "loadPicture": () => (/* binding */ loadPicture),
+/* harmony export */   "compare": () => (/* binding */ compare)
 /* harmony export */ });
 /**
  *
@@ -404,7 +552,28 @@ function getDate() {
   return `${dateNow.toLocaleDateString()} ${dateNow.toLocaleTimeString()}`;
 }
 
-function compareCategoryName(key, order = 'ascending') {
+/**
+ *
+ * @param input
+ * @returns {*}
+ */
+function loadPicture(input) {
+  let data;
+  const reader = new FileReader();
+  reader.readAsDataURL(input.files[0]);
+  reader.onload = function () {
+    data = reader.result;
+  }
+  return data;
+}
+
+/**
+ *
+ * @param key
+ * @param order
+ * @returns {function(*, *): number|number}
+ */
+function compare(key, order = 'ascending') {
   return function (a, b) {
     const firstName = a.state[key].toUpperCase();
     const secondName = b.state[key].toUpperCase();

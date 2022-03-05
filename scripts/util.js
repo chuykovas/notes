@@ -18,7 +18,28 @@ export function getDate() {
   return `${dateNow.toLocaleDateString()} ${dateNow.toLocaleTimeString()}`;
 }
 
-export function compareCategoryName(key, order = 'ascending') {
+/**
+ *
+ * @param input
+ * @returns {*}
+ */
+export function loadPicture(input) {
+  let data;
+  const reader = new FileReader();
+  reader.readAsDataURL(input.files[0]);
+  reader.onload = function () {
+    data = reader.result;
+  }
+  return data;
+}
+
+/**
+ *
+ * @param key
+ * @param order
+ * @returns {function(*, *): number|number}
+ */
+export function compare(key, order = 'ascending') {
   return function (a, b) {
     const firstName = a.state[key].toUpperCase();
     const secondName = b.state[key].toUpperCase();
