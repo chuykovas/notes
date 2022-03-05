@@ -3,31 +3,37 @@ import Category from './category';
 
 export default function Note(params) {
   this.state = {
-    content: [],
+    title: ``,
+    content: ``,
     date: params.date,
+    onClick: params.onClick,
   };
   this.htmlContainer = this.render();
+  this.noteContent = this.renderNoteContent();
 }
 
 Note.prototype.init = function () {
   this.elements = {
-    noteContent: document.querySelector('.note-content'),
+    contentContainer: document.querySelector('.note-content-container'),
   };
-  const noteContent = this.renderNoteContent();
 
-  this.elements.noteContent.lastChild.remove();
-  this.elements.noteContent.append(noteContent);
+  this.elements.contentContainer.innerHTML = '';
+  this.elements.contentContainer.append(this.noteContent);
 }
 
 Note.prototype.delete = function () {
   this.htmlContainer.remove();
-  this.state = {};
+  this.noteContent.remove();
+}
+
+Note.prototype.addImage = function (image) {
+  this.state.content += `${image}`;
 }
 
 Note.prototype.render = function () {
   const titleNote = createElement('h3', {
     className: 'note-title',
-    textContent: this.state.content.title || 'Заметка без названия'
+    textContent: this.state.title || 'Заметка без названия'
   });
 
   const dateNote = createElement('span', {
@@ -37,7 +43,7 @@ Note.prototype.render = function () {
 
   const shortDescription = createElement('p', {
     className: 'note-description',
-    textContent: this.state.content.text || ''
+    textContent: this.state.content || 'Нет текста'
   });
 
   shortDescription.prepend(dateNote);
@@ -49,7 +55,7 @@ Note.prototype.render = function () {
 
   const note = createElement('div', {
     className: 'note',
-    onclick: () => this.init()
+    onclick: () => this.state.onClick(this),
   });
 
   note.append(titleNote, shortDescription, deleteButton);
@@ -66,13 +72,21 @@ Note.prototype.renderNoteContent = function () {
   const noteTitleInput = createElement('div', {
     className: 'note-content-title',
     contentEditable: 'true',
-    textContent: 'Название заметки'
+    textContent: this.state.title || 'Название заметки',
+    oninput: (event) => {
+      this.state.title = event.target.textContent;
+      this.htmlContainer = this.render();
+    }
   });
 
   const noteTextInput = createElement('div', {
     className: 'note-content-text',
     contentEditable: 'true',
-    textContent: 'Название заметки'
+    textContent: this.state.content || 'Текст заметки',
+    oninput: (event) => {
+      this.state.content = event.target.innerHTML;
+      this.htmlContainer = this.render();
+    }
   });
 
   const noteContentWrapper = createElement('div', {

@@ -1,13 +1,17 @@
 import {createElement, getDate} from './util';
 import Note from './note';
 import onChange from 'on-change';
+import {compare} from './util';
 
 
 function Category(params) {
   this.state = {
+    id: Date.now(),
     title: params.title,
     notes: [],
     onClick: params.onClick,
+    sortedNote: false,
+    selectedNote: null,
   };
 
   this.htmlContainer = this.renderCategory();
@@ -17,9 +21,10 @@ Category.prototype.init = function () {
   this.elements = {
     listNote: document.getElementById('noteList'),
   };
-  this.watchedState = onChange(this.state, (value) => this.htmlContainer = this.renderCategory());
 
-  this.renderAllNote();
+  // this.watchedState = onChange(this.state, (value) => this.htmlContainer = this.renderCategory());
+  // this.elements.listNote.innerHTML = '';
+    this.renderAllNote();
 }
 
 Category.prototype.delete = function () {
@@ -39,6 +44,34 @@ Category.prototype.rename = function (newName) {
 
 Category.prototype.addNote = function (note) {
   this.state.notes.unshift(note);
+}
+
+Category.prototype.createNewNote = function () {
+  const newNote = new Note({
+    date: getDate(),
+    onClick: (note) => {
+      this.state.selectedNote = note;
+      this.state.selectedNote.init();
+    },
+  });
+  // this.elements.listNote.innerHTML = '';
+  this.addNote(newNote);
+  this.renderNewNote();
+  this.renderAllNote();
+  //меняем количество заметок в категории
+  this.htmlContainer.children[1].textContent = this.state.notes.length;
+}
+
+Category.prototype.sortNote = function (sortField){
+  console.log(sortField);
+  if (this.state.sortedNote) {
+    this.state.notes.sort(compare(sortField, 'descending'));
+  } else {
+    this.state.notes.sort(compare(sortField));
+  }
+  this.state.sortedNote = !this.state.sortedNote;
+
+  this.renderAllNote();
 }
 
 Category.prototype.renderPopup = function () {
@@ -132,18 +165,18 @@ Category.prototype.renderCategory = function () {
 
 Category.prototype.renderNewNote = function () {
   const note = this.state.notes[0];
-  this.elements.listNote.prepend(note.htmlContainer);
+  // this.elements.listNote.prepend(note.htmlContainer);
 }
 
 Category.prototype.renderAllNote = function () {
   this.elements.listNote.innerHTML = '';
-
-  if(this.state.notes.length === 0){
+  if(!this.state.notes.length){
     this.elements.listNote.prepend(`В категории ${this.state.title} заметок нет`);
   } else {
     const notes = this.state.notes.map(item => item.htmlContainer);
     this.elements.listNote.prepend(...notes);
   }
+
 }
 
 export default Category;
