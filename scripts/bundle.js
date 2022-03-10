@@ -26,6 +26,7 @@ function App() {
     categories: [],
     selectedCategory: null,
     sortedCategory: false,
+    DB: null,
   }
 }
 
@@ -46,8 +47,20 @@ App.prototype.init = function () {
     },
   }
 
-  const dataBase = new _indexedDB__WEBPACK_IMPORTED_MODULE_3__["default"]();
-  dataBase.init();
+  this.getCategoriesInDB().then(result => {
+    result.forEach(item => {
+      const category = new _category__WEBPACK_IMPORTED_MODULE_0__["default"]({
+        title: item || 'Без имени',
+        onClick: (category) => {
+          this.state.selectedCategory = category;
+          // this.state.selectedCategory.htmlContainer.classList.add('checked');
+          this.state.selectedCategory.init();
+        }
+      });
+      this.state.categories.unshift(category);
+    });
+    this.fullRender();
+  });
 
   this.elements.forms.createCategoryForm.addEventListener('submit', event => {
     event.preventDefault();
@@ -63,7 +76,9 @@ App.prototype.init = function () {
         this.state.selectedCategory.init();
       }
     });
+
     this.state.categories.unshift(category);
+    this.setToDB(category.state.id, nameCategory);
     this.renderItem();
   });
 
@@ -87,15 +102,45 @@ App.prototype.init = function () {
   this.elements.buttons.sortByName.addEventListener('click', () => this.state.selectedCategory.sortNote('title'));
 
   this.elements.buttons.addImageToNote.addEventListener('change', (event) => {
-    const image = (0,_util__WEBPACK_IMPORTED_MODULE_1__.createElement)('img', {src: `${(0,_util__WEBPACK_IMPORTED_MODULE_1__.loadPicture)(event.target)}`});
-    this.state.selectedCategory.state.selectedNote.addImage(image);
-    // console.log(this.state.selectedCategory.selectedNote);
+    const data = null;
+    (0,_util__WEBPACK_IMPORTED_MODULE_1__.getBase64)(event.target.files[0], (base64Data) => {
+      console.log(base64Data);
+      this.state.selectedCategory.state.selectedNote.addImage(base64Data);
+    });
   });
 
   this.elements.buttons.switchEnglichLanguage.addEventListener('click', () => i18next__WEBPACK_IMPORTED_MODULE_2__["default"].changeLanguage('en'));
   this.elements.buttons.switchRussianLanguage.addEventListener('click', () => i18next__WEBPACK_IMPORTED_MODULE_2__["default"].changeLanguage('ru'));
 
   this.fullRender();
+}
+
+App.prototype.dbConnect = async function () {
+  this.state.DB = this.state.DB || await new _indexedDB__WEBPACK_IMPORTED_MODULE_3__["default"](
+    'Notes',
+    1,
+    (db, oldVersion, newVersion) => {
+      // обновление базы данных
+      switch (oldVersion) {
+        case 0: {
+          db.createObjectStore('categories');
+        }
+      }
+    });
+
+  return this.state.DB;
+}
+
+App.prototype.setToDB = async function (name, value) {
+  // обновление базы данных
+  const db = await this.dbConnect();
+  await db.set('categories', name, value);
+}
+
+App.prototype.getCategoriesInDB = async function () {
+    const db = await this.dbConnect();
+
+    return await db.getAllCategory('categories');
 }
 
 App.prototype.fullRender = function () {
@@ -175,13 +220,13 @@ Category.prototype.addNote = function (note) {
 
 Category.prototype.createNewNote = function () {
   const newNote = new _note__WEBPACK_IMPORTED_MODULE_1__["default"]({
+    idCategory: this.state.id,
     date: (0,_util__WEBPACK_IMPORTED_MODULE_0__.getDate)(),
     onClick: (note) => {
       this.state.selectedNote = note;
       this.state.selectedNote.init();
     },
   });
-  // this.elements.listNote.innerHTML = '';
   this.addNote(newNote);
   this.renderNewNote();
   this.renderAllNote();
@@ -190,7 +235,6 @@ Category.prototype.createNewNote = function () {
 }
 
 Category.prototype.sortNote = function (sortField){
-  console.log(sortField);
   if (this.state.sortedNote) {
     this.state.notes.sort((0,_util__WEBPACK_IMPORTED_MODULE_0__.compare)(sortField, 'descending'));
   } else {
@@ -292,7 +336,6 @@ Category.prototype.renderCategory = function () {
 
 Category.prototype.renderNewNote = function () {
   const note = this.state.notes[0];
-  // this.elements.listNote.prepend(note.htmlContainer);
 }
 
 Category.prototype.renderAllNote = function () {
@@ -319,87 +362,106 @@ Category.prototype.renderAllNote = function () {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */   "default": () => (/* binding */ IndexedDB)
 /* harmony export */ });
-function DataBase() {
-  this.db = null;
+function IndexedDB(dbName, dbVersion, dbUpgrade) {
+  this.dbName = dbName;
+  this.dbVersion = dbVersion;
+  this.dbUpgrade = dbUpgrade;
 
-  this.init = function () {
-    let request = indexedDB.open('Notes', 1);
+  return new Promise((resolve, reject) => {
 
-    request.onupgradeneeded = function (e) {
-      this.db = e.target.result;
-      if (!this.db.objectStoreNames.contains('categories')) {
-        let categories = this.db.createObjectStore('categories');
-      }
+    // объект базы данных
+    this.db = null;
+
+    // если не поддерживается IndexedDB
+    if (!('indexedDB' in window)) reject('not supported');
+
+    // открытие базы данных
+    const dbOpen = indexedDB.open(this.dbName, this.dbVersion);
+
+    if (this.dbUpgrade) {
+
+      // database upgrade event
+      dbOpen.onupgradeneeded = e => {
+        this.dbUpgrade(dbOpen.result, e.oldVersion, e.newVersion);
+      };
     }
 
-    request.onerror = function () {
-      console.log("Error", request.error);
-    }
-
-    request.onsuccess = function (e) {
-      this.db = e.target.result;
-      console.log("Подключение прошло успешно!");
-    }
-  }
-
-  this.add = function (item) {
-    let transaction = this.db.transaction(['categories'], 'readwrite');
-    let store = transaction.objectStore('categories');
-
-    const category = {title: item.title, noteList: item.notes};
-
-    store.add(category, item.id);
-
-    transaction.onsuccess = () => {
-      console.log("Запись успещно завершена");
-    }
-
-    transaction.onerror = () => {
-      console.log('Ошибка записи в базу');
-    }
-  }
-
-  this.load = function () {
-    let transaction = db.transaction(['categories'], 'readonly');
-    let store = transaction.objectStore("categories");
-
-    let request = store.openCursor();
-
-    request.onsuccess = function () {
-      let cursor = request.result;
-      if (cursor) {
-        let value = cursor.value.data.text;
-        console.log(value);
-        outputDiv.innerHTML += value;
-        cursor.continue();
-      }
-    };
-  }
-
-  this.delete = function (id) {
-    const transaction = this.db.transaction(['categories'], 'readwrite');
-
-    transaction.oncomplete = (event) => {
-      console.log('Transaction completed.')
-      getAndDisplayNotes(db);
-    };
-    transaction.onerror = function (event) {
-      console.log('Ошибка удаления записи');
+    dbOpen.onsuccess = () => {
+      this.db = dbOpen.result;
+      resolve(this);
     };
 
-    const store = transaction.objectStore('categories');
-    const deleteRequest = store.delete(id);
-
-    deleteRequest.onsuccess = (event) => {
-      // обрабатываем успех нашего запроса на удаление
-      console.log('Delete request successful')
+    dbOpen.onerror = e => {
+      reject(`IndexedDB error: ${e.target.errorCode}`);
     };
-  }
+
+  });
+
 }
 
-/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (DataBase);
+IndexedDB.prototype.set = function (storeName, name, value) {
+  return new Promise((resolve, reject) => {
+
+    // новая транзакция
+    const
+      transaction = this.db.transaction(storeName, 'readwrite'),
+      store = transaction.objectStore(storeName);
+    console.log(name, value);
+    // запись в базу
+    store.put(value, name);
+
+    transaction.oncomplete = () => {
+      resolve(true);
+    };
+
+    transaction.onerror = () => {
+      reject(transaction.error);
+    };
+
+  });
+}
+
+IndexedDB.prototype.get = function (storeName, name) {
+  return new Promise((resolve, reject) => {
+
+    // новая транзакция
+    const transaction = this.db.transaction(storeName, 'readonly');
+    const store = transaction.objectStore(storeName);
+
+    // чтение из базы
+    const request = store.get(name);
+
+    request.onsuccess = () => {
+      resolve(request.result);
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
+}
+
+IndexedDB.prototype.getAllCategory = function (storeName) {
+  return new Promise((resolve, reject) => {
+    //новая транзакция
+    const transaction = this.db.transaction(storeName, 'readonly');
+    const store = transaction.objectStore(storeName);
+
+    //чтение из базы
+    const request = store.getAll();
+
+    request.onsuccess = () => {
+      resolve(request.result);
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+
+  })
+}
 
 /***/ }),
 
@@ -420,6 +482,7 @@ __webpack_require__.r(__webpack_exports__);
 
 function Note(params) {
   this.state = {
+    idCategory: params.idCategory,
     title: ``,
     content: ``,
     date: params.date,
@@ -443,8 +506,10 @@ Note.prototype.delete = function () {
   this.noteContent.remove();
 }
 
-Note.prototype.addImage = function (image) {
-  this.state.content += `${image}`;
+Note.prototype.addImage = function (source) {
+  this.state.content += `<img src="${source}">`;
+  this.noteContent = this.renderNoteContent();
+  this.init();
 }
 
 Note.prototype.render = function () {
@@ -460,7 +525,7 @@ Note.prototype.render = function () {
 
   const shortDescription = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('p', {
     className: 'note-description',
-    textContent: this.state.content || 'Нет текста'
+    textContent: this.state.content.substring(0, 25),
   });
 
   shortDescription.prepend(dateNote);
@@ -489,7 +554,8 @@ Note.prototype.renderNoteContent = function () {
   const noteTitleInput = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
     className: 'note-content-title',
     contentEditable: 'true',
-    textContent: this.state.title || 'Название заметки',
+    textContent: this.state.title,
+    placeholder: 'Название заметки',
     oninput: (event) => {
       this.state.title = event.target.textContent;
       this.htmlContainer = this.render();
@@ -499,12 +565,15 @@ Note.prototype.renderNoteContent = function () {
   const noteTextInput = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
     className: 'note-content-text',
     contentEditable: 'true',
-    textContent: this.state.content || 'Текст заметки',
+    placeholder: 'Текст заметки',
     oninput: (event) => {
       this.state.content = event.target.innerHTML;
       this.htmlContainer = this.render();
     }
   });
+
+  // noteTextInput.insertAdjacentHTML('afterbegin', this.state.content);
+  noteTextInput.innerHTML = this.state.content;
 
   const noteContentWrapper = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
     className: 'note-content-body',
@@ -529,7 +598,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "createElement": () => (/* binding */ createElement),
 /* harmony export */   "getDate": () => (/* binding */ getDate),
-/* harmony export */   "loadPicture": () => (/* binding */ loadPicture),
+/* harmony export */   "getBase64": () => (/* binding */ getBase64),
 /* harmony export */   "compare": () => (/* binding */ compare)
 /* harmony export */ });
 /**
@@ -541,7 +610,16 @@ __webpack_require__.r(__webpack_exports__);
 
 function createElement(tag, attributes) {
   const element = document.createElement(tag);
-  Object.keys(attributes).forEach(key => element[key] = attributes[key]);
+
+  if(attributes) {
+    Object.keys(attributes).forEach(key => {
+      if (tag === 'div' && key === 'placeholder') {
+        element.setAttribute(key, attributes[key])
+      } else {
+        element[key] = attributes[key];
+      }
+    });
+  }
 
   return element;
 }
@@ -557,14 +635,14 @@ function getDate() {
  * @param input
  * @returns {*}
  */
-function loadPicture(input) {
-  let data;
+
+function getBase64 (file, callback) {
+
   const reader = new FileReader();
-  reader.readAsDataURL(input.files[0]);
-  reader.onload = function () {
-    data = reader.result;
-  }
-  return data;
+
+  reader.addEventListener('load', () => callback(reader.result));
+
+  reader.readAsDataURL(file);
 }
 
 /**

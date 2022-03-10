@@ -7,7 +7,16 @@
 
 export function createElement(tag, attributes) {
   const element = document.createElement(tag);
-  Object.keys(attributes).forEach(key => element[key] = attributes[key]);
+
+  if(attributes) {
+    Object.keys(attributes).forEach(key => {
+      if (tag === 'div' && key === 'placeholder') {
+        element.setAttribute(key, attributes[key])
+      } else {
+        element[key] = attributes[key];
+      }
+    });
+  }
 
   return element;
 }
@@ -23,14 +32,14 @@ export function getDate() {
  * @param input
  * @returns {*}
  */
-export function loadPicture(input) {
-  let data;
+
+export function getBase64 (file, callback) {
+
   const reader = new FileReader();
-  reader.readAsDataURL(input.files[0]);
-  reader.onload = function () {
-    data = reader.result;
-  }
-  return data;
+
+  reader.addEventListener('load', () => callback(reader.result));
+
+  reader.readAsDataURL(file);
 }
 
 /**

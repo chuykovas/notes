@@ -1,13 +1,14 @@
 import Category from './category';
-import {createElement, getDate, compare, loadPicture} from './util';
+import {createElement, getDate, compare, getBase64} from './util';
 import i18next from 'i18next';
-import DataBase from './indexedDB';
+import IndexedDB from './indexedDB';
 
 export default function App() {
   this.state = {
     categories: [],
     selectedCategory: null,
     sortedCategory: false,
+    DB: null,
   }
 }
 
@@ -28,8 +29,20 @@ App.prototype.init = function () {
     },
   }
 
-  const dataBase = new DataBase();
-  dataBase.init();
+  this.getCategoriesInDB().then(result => {
+    result.forEach(item => {
+      const category = new Category({
+        title: item || 'Без имени',
+        onClick: (category) => {
+          this.state.selectedCategory = category;
+          // this.state.selectedCategory.htmlContainer.classList.add('checked');
+          this.state.selectedCategory.init();
+        }
+      });
+      this.state.categories.unshift(category);
+    });
+    this.fullRender();
+  });
 
   this.elements.forms.createCategoryForm.addEventListener('submit', event => {
     event.preventDefault();
@@ -45,7 +58,9 @@ App.prototype.init = function () {
         this.state.selectedCategory.init();
       }
     });
+
     this.state.categories.unshift(category);
+    this.setToDB(category.state.id, nameCategory);
     this.renderItem();
   });
 
@@ -69,15 +84,45 @@ App.prototype.init = function () {
   this.elements.buttons.sortByName.addEventListener('click', () => this.state.selectedCategory.sortNote('title'));
 
   this.elements.buttons.addImageToNote.addEventListener('change', (event) => {
-    const image = createElement('img', {src: `${loadPicture(event.target)}`});
-    this.state.selectedCategory.state.selectedNote.addImage(image);
-    // console.log(this.state.selectedCategory.selectedNote);
+    const data = null;
+    getBase64(event.target.files[0], (base64Data) => {
+      console.log(base64Data);
+      this.state.selectedCategory.state.selectedNote.addImage(base64Data);
+    });
   });
 
   this.elements.buttons.switchEnglichLanguage.addEventListener('click', () => i18next.changeLanguage('en'));
   this.elements.buttons.switchRussianLanguage.addEventListener('click', () => i18next.changeLanguage('ru'));
 
   this.fullRender();
+}
+
+App.prototype.dbConnect = async function () {
+  this.state.DB = this.state.DB || await new IndexedDB(
+    'Notes',
+    1,
+    (db, oldVersion, newVersion) => {
+      // обновление базы данных
+      switch (oldVersion) {
+        case 0: {
+          db.createObjectStore('categories');
+        }
+      }
+    });
+
+  return this.state.DB;
+}
+
+App.prototype.setToDB = async function (name, value) {
+  // обновление базы данных
+  const db = await this.dbConnect();
+  await db.set('categories', name, value);
+}
+
+App.prototype.getCategoriesInDB = async function () {
+    const db = await this.dbConnect();
+
+    return await db.getAllCategory('categories');
 }
 
 App.prototype.fullRender = function () {

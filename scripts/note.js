@@ -3,6 +3,7 @@ import Category from './category';
 
 export default function Note(params) {
   this.state = {
+    idCategory: params.idCategory,
     title: ``,
     content: ``,
     date: params.date,
@@ -26,8 +27,10 @@ Note.prototype.delete = function () {
   this.noteContent.remove();
 }
 
-Note.prototype.addImage = function (image) {
-  this.state.content += `${image}`;
+Note.prototype.addImage = function (source) {
+  this.state.content += `<img src="${source}">`;
+  this.noteContent = this.renderNoteContent();
+  this.init();
 }
 
 Note.prototype.render = function () {
@@ -43,7 +46,7 @@ Note.prototype.render = function () {
 
   const shortDescription = createElement('p', {
     className: 'note-description',
-    textContent: this.state.content || 'Нет текста'
+    textContent: this.state.content.substring(0, 25),
   });
 
   shortDescription.prepend(dateNote);
@@ -72,7 +75,8 @@ Note.prototype.renderNoteContent = function () {
   const noteTitleInput = createElement('div', {
     className: 'note-content-title',
     contentEditable: 'true',
-    textContent: this.state.title || 'Название заметки',
+    textContent: this.state.title,
+    placeholder: 'Название заметки',
     oninput: (event) => {
       this.state.title = event.target.textContent;
       this.htmlContainer = this.render();
@@ -82,12 +86,15 @@ Note.prototype.renderNoteContent = function () {
   const noteTextInput = createElement('div', {
     className: 'note-content-text',
     contentEditable: 'true',
-    textContent: this.state.content || 'Текст заметки',
+    placeholder: 'Текст заметки',
     oninput: (event) => {
       this.state.content = event.target.innerHTML;
       this.htmlContainer = this.render();
     }
   });
+
+  // noteTextInput.insertAdjacentHTML('afterbegin', this.state.content);
+  noteTextInput.innerHTML = this.state.content;
 
   const noteContentWrapper = createElement('div', {
     className: 'note-content-body',

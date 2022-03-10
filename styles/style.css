@@ -157,6 +157,7 @@ body, button, input {
 }
 
 .note-content-body {
+  max-height: calc(100vh - 85px);
   padding: 10px;
   overflow-y: auto;
 }

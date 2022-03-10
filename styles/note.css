@@ -73,8 +73,14 @@
   white-space: pre-wrap;
 }
 
+[contenteditable]:empty:before {
+  display: block;
+  color: #999;
+  content: attr(placeholder);
+}
+
 .note-content-text img {
   display: block;
-  width: 40%;
+  width: 60%;
   height: auto;
 }

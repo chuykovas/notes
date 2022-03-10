@@ -48,13 +48,13 @@ Category.prototype.addNote = function (note) {
 
 Category.prototype.createNewNote = function () {
   const newNote = new Note({
+    idCategory: this.state.id,
     date: getDate(),
     onClick: (note) => {
       this.state.selectedNote = note;
       this.state.selectedNote.init();
     },
   });
-  // this.elements.listNote.innerHTML = '';
   this.addNote(newNote);
   this.renderNewNote();
   this.renderAllNote();
@@ -63,7 +63,6 @@ Category.prototype.createNewNote = function () {
 }
 
 Category.prototype.sortNote = function (sortField){
-  console.log(sortField);
   if (this.state.sortedNote) {
     this.state.notes.sort(compare(sortField, 'descending'));
   } else {
@@ -165,7 +164,6 @@ Category.prototype.renderCategory = function () {
 
 Category.prototype.renderNewNote = function () {
   const note = this.state.notes[0];
-  // this.elements.listNote.prepend(note.htmlContainer);
 }
 
 Category.prototype.renderAllNote = function () {

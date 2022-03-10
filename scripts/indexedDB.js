@@ -1,79 +1,98 @@
-function DataBase() {
-  this.db = null;
+export default function IndexedDB(dbName, dbVersion, dbUpgrade) {
+  this.dbName = dbName;
+  this.dbVersion = dbVersion;
+  this.dbUpgrade = dbUpgrade;
 
-  this.init = function () {
-    let request = indexedDB.open('Notes', 1);
+  return new Promise((resolve, reject) => {
 
-    request.onupgradeneeded = function (e) {
-      this.db = e.target.result;
-      if (!this.db.objectStoreNames.contains('categories')) {
-        let categories = this.db.createObjectStore('categories');
-      }
+    // объект базы данных
+    this.db = null;
+
+    // если не поддерживается IndexedDB
+    if (!('indexedDB' in window)) reject('not supported');
+
+    // открытие базы данных
+    const dbOpen = indexedDB.open(this.dbName, this.dbVersion);
+
+    if (this.dbUpgrade) {
+
+      // database upgrade event
+      dbOpen.onupgradeneeded = e => {
+        this.dbUpgrade(dbOpen.result, e.oldVersion, e.newVersion);
+      };
     }
 
-    request.onerror = function () {
-      console.log("Error", request.error);
-    }
-
-    request.onsuccess = function (e) {
-      this.db = e.target.result;
-      console.log("Подключение прошло успешно!");
-    }
-  }
-
-  this.add = function (item) {
-    let transaction = this.db.transaction(['categories'], 'readwrite');
-    let store = transaction.objectStore('categories');
-
-    const category = {title: item.title, noteList: item.notes};
-
-    store.add(category, item.id);
-
-    transaction.onsuccess = () => {
-      console.log("Запись успещно завершена");
-    }
-
-    transaction.onerror = () => {
-      console.log('Ошибка записи в базу');
-    }
-  }
-
-  this.load = function () {
-    let transaction = db.transaction(['categories'], 'readonly');
-    let store = transaction.objectStore("categories");
-
-    let request = store.openCursor();
-
-    request.onsuccess = function () {
-      let cursor = request.result;
-      if (cursor) {
-        let value = cursor.value.data.text;
-        console.log(value);
-        outputDiv.innerHTML += value;
-        cursor.continue();
-      }
-    };
-  }
-
-  this.delete = function (id) {
-    const transaction = this.db.transaction(['categories'], 'readwrite');
-
-    transaction.oncomplete = (event) => {
-      console.log('Transaction completed.')
-      getAndDisplayNotes(db);
-    };
-    transaction.onerror = function (event) {
-      console.log('Ошибка удаления записи');
+    dbOpen.onsuccess = () => {
+      this.db = dbOpen.result;
+      resolve(this);
     };
 
-    const store = transaction.objectStore('categories');
-    const deleteRequest = store.delete(id);
-
-    deleteRequest.onsuccess = (event) => {
-      // обрабатываем успех нашего запроса на удаление
-      console.log('Delete request successful')
+    dbOpen.onerror = e => {
+      reject(`IndexedDB error: ${e.target.errorCode}`);
     };
-  }
+
+  });
+
 }
 
-export default DataBase;
+IndexedDB.prototype.set = function (storeName, name, value) {
+  return new Promise((resolve, reject) => {
+
+    // новая транзакция
+    const
+      transaction = this.db.transaction(storeName, 'readwrite'),
+      store = transaction.objectStore(storeName);
+    console.log(name, value);
+    // запись в базу
+    store.put(value, name);
+
+    transaction.oncomplete = () => {
+      resolve(true);
+    };
+
+    transaction.onerror = () => {
+      reject(transaction.error);
+    };
+
+  });
+}
+
+IndexedDB.prototype.get = function (storeName, name) {
+  return new Promise((resolve, reject) => {
+
+    // новая транзакция
+    const transaction = this.db.transaction(storeName, 'readonly');
+    const store = transaction.objectStore(storeName);
+
+    // чтение из базы
+    const request = store.get(name);
+
+    request.onsuccess = () => {
+      resolve(request.result);
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
+}
+
+IndexedDB.prototype.getAllCategory = function (storeName) {
+  return new Promise((resolve, reject) => {
+    //новая транзакция
+    const transaction = this.db.transaction(storeName, 'readonly');
+    const store = transaction.objectStore(storeName);
+
+    //чтение из базы
+    const request = store.getAll();
+
+    request.onsuccess = () => {
+      resolve(request.result);
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+
+  })
+}
