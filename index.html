@@ -1,124 +1,70 @@
 <!doctype html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Notes</title>
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700|Old+Standard+TT&display=swap&subset=cyrillic" rel="stylesheet">
-    <link href="./styles/style.css" rel="stylesheet">
-    <link rel="stylesheet" href="./styles/category.css">
-    <link rel="stylesheet" href="./styles/note.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Notes</title>
+  <link
+      href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700|Old+Standard+TT&display=swap&subset=cyrillic"
+      rel="stylesheet">
+  <link href="./styles/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="./styles/category.css">
+  <link rel="stylesheet" href="./styles/note.css">
+  <link rel="stylesheet" href="./styles/popup.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
 </head>
 <body>
-    <main class="content">
-        <div class="category-list">
-            <div class="category-list_header">
-                <img src="./assets/to-do-list.png" alt="logo" class="logo"/>
-                <h2>Notes</h2>
-            </div>
-            <form class="search-form">
-                <button class="search-button">
-                    <img src="./assets/search.png" alt="search-icon" class="search-icon" width="24" height="24"/>
-                </button>
-                <input class="search-input" type="search" placeholder="Поиск по категориям" />
-            </form>
-            <div class="buttons-wrapper">
-                <button class="add-category-button category-button">
-                    <img class="add-icon" src="./assets/add.png" alt="Добавление категории" title="Добавление категории">
-                </button>
-                <button class="sort-category-button category-button">
-                    <img class="sort-icon" src="./assets/sort.png" alt="Сортировка категорий" title="Сортировка категорий">
-                </button>
-            </div>
-            <div class="category-list_content">
-                <div class="category">
-                    <h3 class="category-title">Без категории</h3>
-                    <p class="notes-count">Заметок: <span>4</span></p>
-                </div>
-         <!--       <div class="category">
-                    <h3 class="category-title">Без категории</h3>
-                    <p class="notes-count">Заметок: <span>4</span></p>
-                </div>
-                <div class="category">
-                    <h3 class="category-title">Без категории</h3>
-                    <p class="notes-count">Заметок: <span>4</span></p>
-                </div>
-                <div class="category">
-                    <h3 class="category-title">Без категории</h3>
-                    <p class="notes-count">Заметок: <span>4</span></p>
-                </div>
-                <div class="category">
-                    <h3 class="category-title">Без категории</h3>
-                    <p class="notes-count">Заметок: <span>4</span></p>
-                </div>
-                <div class="category">
-                    <h3 class="category-title">Без категории</h3>
-                    <p class="notes-count">Заметок: <span>4</span></p>
-                </div>
-                <div class="category">
-                    <h3 class="category-title">Без категории</h3>
-                    <p class="notes-count">Заметок: <span>4</span></p>
-                </div>
-                <div class="category">
-                    <h3 class="category-title">Без категории</h3>
-                    <p class="notes-count">Заметок: <span>4</span></p>
-                </div>
-                <div class="category">
-                    <h3 class="category-title">Без категории</h3>
-                    <p class="notes-count">Заметок: <span>4</span></p>
-                </div> <div class="category">
-                <h3 class="category-title">Без категории</h3>
-                <p class="notes-count">Заметок: <span>4</span></p>
-            </div>
-                <div class="category">
-                    <h3 class="category-title">Без категории</h3>
-                    <p class="notes-count">Заметок: <span>4</span></p>
-                </div> <div class="category">
-                <h3 class="category-title">Без категории</h3>
-                <p class="notes-count">Заметок: <span>4</span></p>
-            </div>
-                <div class="category">
-                    <h3 class="category-title">Без категории</h3>
-                    <p class="notes-count">Заметок: <span>4</span></p>
-                </div>
-                <div class="category">
-                    <h3 class="category-title">Без категории</h3>
-                    <p class="notes-count">Заметок: <span>4</span></p>
-                </div>-->
-            </div>
+<main class="content">
+  <div class="category-list">
+    <div class="buttons-wrapper">
+      <button class="sort-category-button category-button" id="sortCategory"><i class="fas fa-sort-alpha-down"></i></button>
+    </div>
+    <div class="category-list_content" id="listCategory"></div>
+    <form class="add-category-form" id="createCategoryForm">
+      <button class="add-button"><i class="fas fa-plus-circle"></i></button>
+      <input id="inputNameNewCategory" type="text" name="nameCategory" class="add-category-input" placeholder="Новая категория"/>
+    </form>
+  </div>
+  <div class="note-list" >
+    <div class="note-list_header">
+      <form class="search-form">
+        <button class="search-button">
+          <img src="./assets/search.png" alt="search-icon" class="search-icon" width="24" height="24"/>
+        </button>
+        <input id="searchInput" class="search-input" type="search" placeholder="Поиск по заметкам"/>
+      </form>
+      <div class="buttons-wrapper">
+        <button id="sortByName"><i class="fas fa-sort-alpha-down"></i></button>
+        <button id="sortByDate"><i class="fas fa-sort-numeric-down"></i></button>
+      </div>
+    </div>
+    <div class="note-list_content" id="noteList"></div>
+    <div class="add-new-note">
+      <button class="add-button"><i class="fas fa-plus-circle"></i></button>
+      <p id="newNote" class="add-new-note-text">Новая заметка</p>
+    </div>
+  </div>
+  <div class="note-content">
+    <div class="note-content-header">
+      <div class="buttons-wrapper">
+        <div class="upload-button-wrapper">
+          <input class="upload-button-attach" id="addImage" type="file" accept=".jpg,.png,.gif,.bmp,.jpeg">
         </div>
-        <div class="note-list">
-            <div class="note-list_header">
-                <form class="search-form">
-                    <button class="search-button">
-                        <img src="./assets/search.png" alt="search-icon" class="search-icon" width="24" height="24"/>
-                    </button>
-                    <input class="search-input" type="search" placeholder="Поиск по заметкам" />
-                </form>
-                <div class="buttons-wrapper">
-                    <button><i class="fas fa-sort-alpha-down"></i></button>
-                    <button><i class="fas fa-sort-numeric-down"></i></button>
-                    <button><i class="fas fa-edit"></i></i></button>
-                    <button><i class="fas fa-trash-alt"></i></i></button>
-                    <button><i class="fas fa-plus-circle"></i></i></button>
-                </div>
-            </div>
-            <div class="note-list_content">
-                <div class="note">
-                    <h3 class="note-title">Заметка 1</h3>
-                    <p class="note-date">21.02.2022</p>
-                    <p class="note-description">Ботинки горные - обязательно.  Кошки есть и мягкие и с креплением на рант. Вес рюкзака мужского -28-30 кг, женский - 25, кг . Оплатить можно одним платежом ,</p>
-                </div>
-            </div>
-        </div>
-        <div class="note-content">
-            <div class="note-content_title" contenteditable="true">Название</div>
-            <div class="note-content_text" contenteditable="true">Текст</div>
-        </div>
-    </main>
-    <script src="./scripts/app.js"></script>
+      </div>
+<!--      <div class="switch-language">-->
+<!--        <button class="button-russian-language" id="ru">ru</button>-->
+<!--        <button class="button-english-language" id="en">en</button>-->
+<!--      </div>-->
+    </div>
+    <div class="note-content-container"></div>
+  </div>
+</main>
+<div class="content-for-mobile">
+  <p>Откройте с компьютера</p>
+  <p>Мобильная версия на стадии разработки. Приносим свои извинения) </p>
+</div>
+<script src="./scripts/bundle.js"></script>
 </body>
 </html>

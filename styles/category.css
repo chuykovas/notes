@@ -1,32 +1,52 @@
-.category{
-    position: relative;
-    margin-bottom: 10px;
-    padding: 10px;
-    background: #90929e;
-    border-radius: 10px;
+.category {
+  display: flex;
+  align-items: center;
+  position: relative;
+  margin-bottom: 10px;
+  padding: 10px;
+  font-weight: normal;
+  border-radius: 10px;
 }
-.category::after{
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    content: "\f2ed";
-    font-family: "Font Awesome 5 Free";
-    font-weight: 900;
-    color: #4e5560;
+.category:before{
+  content: '\f07b';
+  font-family: "Font Awesome 5 Free";
+  font-weight: bold;
+  flex-grow: 0;
+  flex-basis: 23px;
+  color: #fdaf03;
 }
-.category::before{
-    position: absolute;
-    top: 10px;
-    right: 30px;
-    content: "\f044";
-    font-family: "Font Awesome 5 Free";
-    font-weight: 900;
-    color: #4e5560;
+
+.category-title{
+  font-weight: 600;
 }
-.category:hover{
-    background: #717381;
-    opacity: 0.7;
+
+.notes-count{
+  margin-left: auto;
 }
-.category.checked{
-    background: #717381;
+.category:hover {
+  background: #ccc;
+  /*opacity: 0.7;*/
+  z-index: 99;
 }
+
+.category.checked {
+  background: #c9c8c9;
+}
+
+.content .kebab-menu-button{
+  display: none;
+  padding-left: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.25s ease-out;
+}
+.content .kebab-menu-button:before{
+  content: '\f142';
+  font-family: "Font Awesome 5 Free";
+  font-weight: bold;
+}
+.category:hover .kebab-menu-button{
+  display: block;
+}
+

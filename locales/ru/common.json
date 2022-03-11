@@ -1,0 +1,15 @@
+{
+  "translation": {
+    "inputNameNewCategory": "Новая категория",
+    "newNote": "Новая заметка",
+    "searchInput": "Поиск по категориям",
+    "kebabMenu": {
+      "editButton": "Редактировать",
+      "deleteButton": "Удалить"
+    },
+    "noteContent": {
+      "titleNote": "Название заметки",
+      "textNote": "Текст заметки"
+    }
+  }
+}
