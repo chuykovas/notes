@@ -44,7 +44,7 @@ Category.prototype.getNotesInDB = function () {
         });
 
         this.addNote(note);
-        console.log(note);
+
         this.htmlContainer.children[1].textContent = this.state.notes.length;
       });
     });
