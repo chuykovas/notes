@@ -61,7 +61,7 @@ App.prototype.init = function () {
             // this.state.selectedCategory.htmlContainer.classList.add('checked');
             this.state.selectedCategory.init();
           },
-          deleteCategory: (category) => {
+          onDelete: (category) => {
             this.state.categories = this.state.categories.filter(item => item !== category);
             this.state.selectedCategory = null;
           }
@@ -87,7 +87,7 @@ App.prototype.init = function () {
         // this.state.selectedCategory.htmlContainer.classList.add('checked');
         this.state.selectedCategory.init();
       },
-      deleteCategory: (category) => this.state.categories = this.state.categories.filter(item => item !== category),
+      onDelete: (category) => this.state.categories = this.state.categories.filter(item => item !== category),
     });
 
     this.state.categories.unshift(category);
@@ -202,7 +202,7 @@ function Category(params) {
     sortedNote: false,
     selectedNote: null,
     onClick: params.onClick,
-    deleteCategory: params.deleteCategory,
+    onDelete: params.onDelete,
   };
 
   this.htmlContainer = this.renderCategory();
@@ -230,6 +230,9 @@ Category.prototype.getNotesInDB = function () {
             this.state.selectedNote = note;
             this.state.selectedNote.init();
           },
+          onDelete: (note) => {
+            this.state.notes = this.state.notes.filter(item => item !== note);
+          },
         });
 
         this.addNote(note);
@@ -248,7 +251,7 @@ Category.prototype.delete = function () {
   this.store.deleteItem('categories', this.state.id);
   this.store.deleteNotes('notes', 'idCategory', this.state.id);
   //удаление из state приложения
-  this.state.deleteCategory(this);
+  this.state.onDelete(this);
 }
 
 /**
@@ -273,6 +276,9 @@ Category.prototype.createNewNote = function () {
     onClick: (note) => {
       this.state.selectedNote = note;
       this.state.selectedNote.init();
+    },
+    onDelete: (note) => {
+      this.state.notes = this.state.notes.filter(item => item !== note);
     },
   });
   this.addNote(newNote);
@@ -428,6 +434,7 @@ function Note(params) {
     content: params.content || ``,
     date: params.date,
     onClick: params.onClick,
+    onDelete: params.onDelete,
   };
   this.htmlContainer = this.render();
   this.noteContent = this.renderNoteContent();
@@ -445,7 +452,7 @@ Note.prototype.init = function () {
 
 Note.prototype.delete = function () {
   this.htmlContainer.remove();
-  this.noteContent.remove();
+  this.noteContent.innerHTML = '';
   this.store.deleteItem('notes', this.state.date);
 }
 
@@ -481,7 +488,10 @@ Note.prototype.render = function () {
 
   const deleteButton = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('button', {
     className: 'delete-note-button',
-    onclick: () => this.delete()
+    onclick: () => {
+      this.delete();
+      this.state.onDelete(this);
+    }
   });
 
   const note = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
@@ -533,7 +543,6 @@ Note.prototype.renderNoteContent = function () {
     }
   });
 
-  // noteTextInput.insertAdjacentHTML('afterbegin', this.state.content);
   noteTextInput.innerHTML = this.state.content;
 
   const noteContentWrapper = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
@@ -557,6 +566,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (/* binding */ IndexedDB)
 /* harmony export */ });
+/**
+ * инициальзация базы данных
+ * @param dbName - имя базы данных
+ * @param dbVersion - версия базы данных
+ * @param dbUpgrade - callback для обновления базы данных
+ * @constructor
+ */
+
 function IndexedDB(dbName, dbVersion, dbUpgrade) {
   this.dbName = dbName;
   this.dbVersion = dbVersion;
@@ -591,6 +608,13 @@ function IndexedDB(dbName, dbVersion, dbUpgrade) {
   });
 }
 
+/**
+ * запись в базу данных
+ * @param storeName - имя хранилища
+ * @param name - название для поля key
+ * @param value - записываемое значение
+ * @returns {Promise<unknown> | Promise<unknown>} возврщает промис
+ */
 IndexedDB.prototype.set = function (storeName, name, value) {
   return new Promise((resolve, reject) => {
     // новая транзакция
@@ -609,6 +633,12 @@ IndexedDB.prototype.set = function (storeName, name, value) {
   });
 }
 
+/**
+ * получение одного значения из базы данных
+ * @param storeName - имя хранилища
+ * @param name - значение key для получения элемента из базы
+ * @returns {Promise<unknown> | Promise<unknown>}
+ */
 IndexedDB.prototype.get = function (storeName, name) {
   return new Promise((resolve, reject) => {
     // новая транзакция
@@ -629,9 +659,12 @@ IndexedDB.prototype.get = function (storeName, name) {
 }
 
 /**
- *
+ * получение всех значений из базы данных
+ * если передан параметр searchName будут найдены все записи с этим значением
+ * @param storeName - имя хранилища
+ * @param searchName - поле для поиска
+ * @returns {Promise<unknown> | Promise<unknown>}
  */
-
 IndexedDB.prototype.getAll = function (storeName, searchName) {
   return new Promise((resolve, reject) => {
     //новая транзакция
@@ -656,9 +689,12 @@ IndexedDB.prototype.getAll = function (storeName, searchName) {
 }
 
 /**
- *
+ * получение записей из базы данных по индексу
+ * @param storeName - имя хранилища
+ * @param nameIndex - название индекса
+ * @param value - значение индекса
+ * @returns {Promise<unknown> | Promise<unknown>}
  */
-
 IndexedDB.prototype.getByIndex = function (storeName, nameIndex, value) {
   return new Promise((resolve, reject) => {
     //новая транзакция
@@ -678,9 +714,11 @@ IndexedDB.prototype.getByIndex = function (storeName, nameIndex, value) {
 }
 
 /**
- *
+ * удаление записи из базы данных
+ * @param storeName - имя хранилища
+ * @param id - ключ удаляемого элемента
+ * @returns {Promise<unknown> | Promise<unknown>}
  */
-
 IndexedDB.prototype.deleteEntry = function (storeName, id) {
   return new Promise((resolve, reject) => {
     const transaction = this.db.transaction(storeName, 'readwrite');
@@ -699,6 +737,13 @@ IndexedDB.prototype.deleteEntry = function (storeName, id) {
   });
 }
 
+/**
+ * удаление всех записей с указанным индексом
+ * @param storeName - имя хранилища
+ * @param nameIndex - название индекса
+ * @param indexValue - значение индекса
+ * @returns {Promise<unknown> | Promise<unknown>}
+ */
 IndexedDB.prototype.deleteMultipleEntries = function (storeName, nameIndex, indexValue) {
   return new Promise((resolve, reject) => {
     //новая транзакция

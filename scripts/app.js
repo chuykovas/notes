@@ -43,7 +43,7 @@ App.prototype.init = function () {
             // this.state.selectedCategory.htmlContainer.classList.add('checked');
             this.state.selectedCategory.init();
           },
-          deleteCategory: (category) => {
+          onDelete: (category) => {
             this.state.categories = this.state.categories.filter(item => item !== category);
             this.state.selectedCategory = null;
           }
@@ -69,7 +69,7 @@ App.prototype.init = function () {
         // this.state.selectedCategory.htmlContainer.classList.add('checked');
         this.state.selectedCategory.init();
       },
-      deleteCategory: (category) => this.state.categories = this.state.categories.filter(item => item !== category),
+      onDelete: (category) => this.state.categories = this.state.categories.filter(item => item !== category),
     });
 
     this.state.categories.unshift(category);

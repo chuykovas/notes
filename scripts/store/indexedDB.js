@@ -1,3 +1,11 @@
+/**
+ * инициальзация базы данных
+ * @param dbName - имя базы данных
+ * @param dbVersion - версия базы данных
+ * @param dbUpgrade - callback для обновления базы данных
+ * @constructor
+ */
+
 export default function IndexedDB(dbName, dbVersion, dbUpgrade) {
   this.dbName = dbName;
   this.dbVersion = dbVersion;
@@ -32,6 +40,13 @@ export default function IndexedDB(dbName, dbVersion, dbUpgrade) {
   });
 }
 
+/**
+ * запись в базу данных
+ * @param storeName - имя хранилища
+ * @param name - название для поля key
+ * @param value - записываемое значение
+ * @returns {Promise<unknown> | Promise<unknown>} возврщает промис
+ */
 IndexedDB.prototype.set = function (storeName, name, value) {
   return new Promise((resolve, reject) => {
     // новая транзакция
@@ -50,6 +65,12 @@ IndexedDB.prototype.set = function (storeName, name, value) {
   });
 }
 
+/**
+ * получение одного значения из базы данных
+ * @param storeName - имя хранилища
+ * @param name - значение key для получения элемента из базы
+ * @returns {Promise<unknown> | Promise<unknown>}
+ */
 IndexedDB.prototype.get = function (storeName, name) {
   return new Promise((resolve, reject) => {
     // новая транзакция
@@ -70,9 +91,12 @@ IndexedDB.prototype.get = function (storeName, name) {
 }
 
 /**
- *
+ * получение всех значений из базы данных
+ * если передан параметр searchName будут найдены все записи с этим значением
+ * @param storeName - имя хранилища
+ * @param searchName - поле для поиска
+ * @returns {Promise<unknown> | Promise<unknown>}
  */
-
 IndexedDB.prototype.getAll = function (storeName, searchName) {
   return new Promise((resolve, reject) => {
     //новая транзакция
@@ -97,9 +121,12 @@ IndexedDB.prototype.getAll = function (storeName, searchName) {
 }
 
 /**
- *
+ * получение записей из базы данных по индексу
+ * @param storeName - имя хранилища
+ * @param nameIndex - название индекса
+ * @param value - значение индекса
+ * @returns {Promise<unknown> | Promise<unknown>}
  */
-
 IndexedDB.prototype.getByIndex = function (storeName, nameIndex, value) {
   return new Promise((resolve, reject) => {
     //новая транзакция
@@ -119,9 +146,11 @@ IndexedDB.prototype.getByIndex = function (storeName, nameIndex, value) {
 }
 
 /**
- *
+ * удаление записи из базы данных
+ * @param storeName - имя хранилища
+ * @param id - ключ удаляемого элемента
+ * @returns {Promise<unknown> | Promise<unknown>}
  */
-
 IndexedDB.prototype.deleteEntry = function (storeName, id) {
   return new Promise((resolve, reject) => {
     const transaction = this.db.transaction(storeName, 'readwrite');
@@ -140,6 +169,13 @@ IndexedDB.prototype.deleteEntry = function (storeName, id) {
   });
 }
 
+/**
+ * удаление всех записей с указанным индексом
+ * @param storeName - имя хранилища
+ * @param nameIndex - название индекса
+ * @param indexValue - значение индекса
+ * @returns {Promise<unknown> | Promise<unknown>}
+ */
 IndexedDB.prototype.deleteMultipleEntries = function (storeName, nameIndex, indexValue) {
   return new Promise((resolve, reject) => {
     //новая транзакция

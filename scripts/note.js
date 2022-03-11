@@ -9,6 +9,7 @@ export default function Note(params) {
     content: params.content || ``,
     date: params.date,
     onClick: params.onClick,
+    onDelete: params.onDelete,
   };
   this.htmlContainer = this.render();
   this.noteContent = this.renderNoteContent();
@@ -26,7 +27,7 @@ Note.prototype.init = function () {
 
 Note.prototype.delete = function () {
   this.htmlContainer.remove();
-  this.noteContent.remove();
+  this.noteContent.innerHTML = '';
   this.store.deleteItem('notes', this.state.date);
 }
 
@@ -62,7 +63,10 @@ Note.prototype.render = function () {
 
   const deleteButton = createElement('button', {
     className: 'delete-note-button',
-    onclick: () => this.delete()
+    onclick: () => {
+      this.delete();
+      this.state.onDelete(this);
+    }
   });
 
   const note = createElement('div', {
@@ -114,7 +118,6 @@ Note.prototype.renderNoteContent = function () {
     }
   });
 
-  // noteTextInput.insertAdjacentHTML('afterbegin', this.state.content);
   noteTextInput.innerHTML = this.state.content;
 
   const noteContentWrapper = createElement('div', {

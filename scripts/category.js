@@ -13,7 +13,7 @@ function Category(params) {
     sortedNote: false,
     selectedNote: null,
     onClick: params.onClick,
-    deleteCategory: params.deleteCategory,
+    onDelete: params.onDelete,
   };
 
   this.htmlContainer = this.renderCategory();
@@ -41,6 +41,9 @@ Category.prototype.getNotesInDB = function () {
             this.state.selectedNote = note;
             this.state.selectedNote.init();
           },
+          onDelete: (note) => {
+            this.state.notes = this.state.notes.filter(item => item !== note);
+          },
         });
 
         this.addNote(note);
@@ -59,7 +62,7 @@ Category.prototype.delete = function () {
   this.store.deleteItem('categories', this.state.id);
   this.store.deleteNotes('notes', 'idCategory', this.state.id);
   //удаление из state приложения
-  this.state.deleteCategory(this);
+  this.state.onDelete(this);
 }
 
 /**
@@ -84,6 +87,9 @@ Category.prototype.createNewNote = function () {
     onClick: (note) => {
       this.state.selectedNote = note;
       this.state.selectedNote.init();
+    },
+    onDelete: (note) => {
+      this.state.notes = this.state.notes.filter(item => item !== note);
     },
   });
   this.addNote(newNote);
