@@ -58,7 +58,8 @@ App.prototype.init = function () {
           title: item.title || 'Без имени',
           onClick: (category) => {
             this.state.selectedCategory = category;
-            // this.state.selectedCategory.htmlContainer.classList.add('checked');
+            this.state.categories.forEach(item => item.htmlContainer.classList.remove('checked'));
+            this.state.selectedCategory.htmlContainer.classList.add('checked');
             this.state.selectedCategory.init();
           },
           onDelete: (category) => {
@@ -84,7 +85,8 @@ App.prototype.init = function () {
       title: nameCategory || 'Без имени',
       onClick: (category) => {
         this.state.selectedCategory = category;
-        // this.state.selectedCategory.htmlContainer.classList.add('checked');
+        this.state.categories.forEach(item => item.htmlContainer.classList.remove('checked'));
+        this.state.selectedCategory.htmlContainer.classList.add('checked');
         this.state.selectedCategory.init();
       },
       onDelete: (category) => this.state.categories = this.state.categories.filter(item => item !== category),
@@ -229,6 +231,8 @@ Category.prototype.getNotesInDB = function () {
           onClick: (note) => {
             this.state.selectedNote = note;
             this.state.selectedNote.init();
+            this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
+            this.state.selectedNote.htmlContainer.classList.add('checked');
           },
           onDelete: (note) => {
             this.state.notes = this.state.notes.filter(item => item !== note);
@@ -276,6 +280,8 @@ Category.prototype.createNewNote = function () {
     onClick: (note) => {
       this.state.selectedNote = note;
       this.state.selectedNote.init();
+      this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
+      this.state.selectedNote.htmlContainer.classList.add('checked');
     },
     onDelete: (note) => {
       this.state.notes = this.state.notes.filter(item => item !== note);

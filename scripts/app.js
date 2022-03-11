@@ -40,7 +40,8 @@ App.prototype.init = function () {
           title: item.title || 'Без имени',
           onClick: (category) => {
             this.state.selectedCategory = category;
-            // this.state.selectedCategory.htmlContainer.classList.add('checked');
+            this.state.categories.forEach(item => item.htmlContainer.classList.remove('checked'));
+            this.state.selectedCategory.htmlContainer.classList.add('checked');
             this.state.selectedCategory.init();
           },
           onDelete: (category) => {
@@ -66,7 +67,8 @@ App.prototype.init = function () {
       title: nameCategory || 'Без имени',
       onClick: (category) => {
         this.state.selectedCategory = category;
-        // this.state.selectedCategory.htmlContainer.classList.add('checked');
+        this.state.categories.forEach(item => item.htmlContainer.classList.remove('checked'));
+        this.state.selectedCategory.htmlContainer.classList.add('checked');
         this.state.selectedCategory.init();
       },
       onDelete: (category) => this.state.categories = this.state.categories.filter(item => item !== category),

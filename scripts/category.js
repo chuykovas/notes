@@ -40,6 +40,8 @@ Category.prototype.getNotesInDB = function () {
           onClick: (note) => {
             this.state.selectedNote = note;
             this.state.selectedNote.init();
+            this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
+            this.state.selectedNote.htmlContainer.classList.add('checked');
           },
           onDelete: (note) => {
             this.state.notes = this.state.notes.filter(item => item !== note);
@@ -87,6 +89,8 @@ Category.prototype.createNewNote = function () {
     onClick: (note) => {
       this.state.selectedNote = note;
       this.state.selectedNote.init();
+      this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
+      this.state.selectedNote.htmlContainer.classList.add('checked');
     },
     onDelete: (note) => {
       this.state.notes = this.state.notes.filter(item => item !== note);
