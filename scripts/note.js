@@ -1,16 +1,18 @@
-import {createElement} from './util';
+import {createElement, getDate} from './util';
 import Category from './category';
+import Store from './store/store';
 
 export default function Note(params) {
   this.state = {
     idCategory: params.idCategory,
-    title: ``,
-    content: ``,
+    title: params.title || ``,
+    content: params.content || ``,
     date: params.date,
     onClick: params.onClick,
   };
   this.htmlContainer = this.render();
   this.noteContent = this.renderNoteContent();
+  this.store = new Store();
 }
 
 Note.prototype.init = function () {
@@ -25,11 +27,18 @@ Note.prototype.init = function () {
 Note.prototype.delete = function () {
   this.htmlContainer.remove();
   this.noteContent.remove();
+  this.store.deleteItem('notes', this.state.date);
 }
 
 Note.prototype.addImage = function (source) {
   this.state.content += `<img src="${source}">`;
   this.noteContent = this.renderNoteContent();
+  this.store.set('notes', this.state.date, {
+    idCategory: this.state.idCategory,
+    date: this.state.date,
+    title: this.state.title,
+    content: this.state.content,
+  });
   this.init();
 }
 
@@ -41,7 +50,7 @@ Note.prototype.render = function () {
 
   const dateNote = createElement('span', {
     className: 'note-date',
-    textContent: `${this.state.date}`
+    textContent: `${getDate(this.state.date)}`
   });
 
   const shortDescription = createElement('p', {
@@ -69,7 +78,7 @@ Note.prototype.render = function () {
 Note.prototype.renderNoteContent = function () {
   const noteDate = createElement('div', {
     className: 'note-content-date',
-    textContent: `${this.state.date}`
+    textContent: `${getDate(this.state.date)}`
   });
 
   const noteTitleInput = createElement('div', {
@@ -79,6 +88,12 @@ Note.prototype.renderNoteContent = function () {
     placeholder: 'Название заметки',
     oninput: (event) => {
       this.state.title = event.target.textContent;
+      this.store.set('notes', this.state.date, {
+        idCategory: this.state.idCategory,
+        date: this.state.date,
+        title: this.state.title,
+        content: this.state.content,
+      });
       this.htmlContainer = this.render();
     }
   });
@@ -89,6 +104,12 @@ Note.prototype.renderNoteContent = function () {
     placeholder: 'Текст заметки',
     oninput: (event) => {
       this.state.content = event.target.innerHTML;
+      this.store.set('notes', this.state.date, {
+        idCategory: this.state.idCategory,
+        date: this.state.date,
+        title: this.state.title,
+        content: this.state.content,
+      });
       this.htmlContainer = this.render();
     }
   });
@@ -104,4 +125,3 @@ Note.prototype.renderNoteContent = function () {
 
   return noteContentWrapper;
 }
-

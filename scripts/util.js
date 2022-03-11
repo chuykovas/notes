@@ -21,8 +21,8 @@ export function createElement(tag, attributes) {
   return element;
 }
 
-export function getDate() {
-  const dateNow = new Date();
+export function getDate(date) {
+  const dateNow = new Date(date);
 
   return `${dateNow.toLocaleDateString()} ${dateNow.toLocaleTimeString()}`;
 }

@@ -2,34 +2,64 @@ import {createElement, getDate} from './util';
 import Note from './note';
 import onChange from 'on-change';
 import {compare} from './util';
+import Store from './store/store';
 
 
 function Category(params) {
   this.state = {
-    id: Date.now(),
+    id: params.id,
     title: params.title,
     notes: [],
-    onClick: params.onClick,
     sortedNote: false,
     selectedNote: null,
+    onClick: params.onClick,
+    deleteCategory: params.deleteCategory,
   };
 
   this.htmlContainer = this.renderCategory();
+  this.store = new Store();
 }
 
 Category.prototype.init = function () {
   this.elements = {
     listNote: document.getElementById('noteList'),
   };
-
   // this.watchedState = onChange(this.state, (value) => this.htmlContainer = this.renderCategory());
-  // this.elements.listNote.innerHTML = '';
-    this.renderAllNote();
+  this.renderAllNote();
+}
+
+Category.prototype.getNotesInDB = function () {
+  this.store.getByIndex('notes', 'idCategory', this.state.id)
+    .then(result => {
+      result.forEach(item => {
+        const note = new Note({
+          idCategory: this.state.id,
+          title: item.title,
+          content: item.content,
+          date: item.date,
+          onClick: (note) => {
+            this.state.selectedNote = note;
+            this.state.selectedNote.init();
+          },
+        });
+
+        this.addNote(note);
+        console.log(note);
+        this.htmlContainer.children[1].textContent = this.state.notes.length;
+      });
+    });
+
 }
 
 Category.prototype.delete = function () {
+  //удаление со страницы
   this.state.notes = [];
   this.htmlContainer.remove();
+  //удаление из хранилища
+  this.store.deleteItem('categories', this.state.id);
+  this.store.deleteNotes('notes', 'idCategory', this.state.id);
+  //удаление из state приложения
+  this.state.deleteCategory(this);
 }
 
 /**
@@ -47,17 +77,24 @@ Category.prototype.addNote = function (note) {
 }
 
 Category.prototype.createNewNote = function () {
+  const date = Date.now();
   const newNote = new Note({
     idCategory: this.state.id,
-    date: getDate(),
+    date: date,
     onClick: (note) => {
       this.state.selectedNote = note;
       this.state.selectedNote.init();
     },
   });
   this.addNote(newNote);
-  this.renderNewNote();
   this.renderAllNote();
+
+  this.store.set('notes', date, {
+    idCategory: this.state.id,
+    date: newNote.state.date,
+    title: newNote.state.title,
+    content: newNote.state.content,
+  });
   //меняем количество заметок в категории
   this.htmlContainer.children[1].textContent = this.state.notes.length;
 }
@@ -160,10 +197,6 @@ Category.prototype.renderCategory = function () {
   category.append(categoryTitle, noteCount, menuButton, kebabMenu);
 
   return category;
-}
-
-Category.prototype.renderNewNote = function () {
-  const note = this.state.notes[0];
 }
 
 Category.prototype.renderAllNote = function () {

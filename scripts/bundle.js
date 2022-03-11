@@ -15,10 +15,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _category__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./category */ "./scripts/category.js");
 /* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./util */ "./scripts/util.js");
 /* harmony import */ var i18next__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! i18next */ "./node_modules/i18next/dist/esm/i18next.js");
-/* harmony import */ var _indexedDB__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./indexedDB */ "./scripts/indexedDB.js");
+/* harmony import */ var _store_store__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./store/store */ "./scripts/store/store.js");
 
 
 
+// import IndexedDB from './store/indexedDB';
 
 
 function App() {
@@ -39,46 +40,62 @@ App.prototype.init = function () {
     buttons: {
       createNoteButton: document.querySelector('.add-new-note'),
       sortCategory: document.getElementById('sortCategory'),
-      switchRussianLanguage: document.getElementById('ru'),
-      switchEnglichLanguage: document.getElementById('en'),
+      // switchRussianLanguage: document.getElementById('ru'),
+      // switchEnglichLanguage: document.getElementById('en'),
       addImageToNote: document.getElementById('addImage'),
       sortByDate: document.getElementById('sortByDate'),
       sortByName: document.getElementById('sortByName'),
     },
   }
 
-  this.getCategoriesInDB().then(result => {
-    result.forEach(item => {
-      const category = new _category__WEBPACK_IMPORTED_MODULE_0__["default"]({
-        title: item || 'Без имени',
-        onClick: (category) => {
-          this.state.selectedCategory = category;
-          // this.state.selectedCategory.htmlContainer.classList.add('checked');
-          this.state.selectedCategory.init();
-        }
+  this.store = new _store_store__WEBPACK_IMPORTED_MODULE_3__["default"]();
+
+  this.store.getAll('categories')
+    .then(result => {
+      result.forEach(item => {
+        const category = new _category__WEBPACK_IMPORTED_MODULE_0__["default"]({
+          id: item.id,
+          title: item.title || 'Без имени',
+          onClick: (category) => {
+            this.state.selectedCategory = category;
+            // this.state.selectedCategory.htmlContainer.classList.add('checked');
+            this.state.selectedCategory.init();
+          },
+          deleteCategory: (category) => {
+            this.state.categories = this.state.categories.filter(item => item !== category);
+            this.state.selectedCategory = null;
+          }
+        });
+        category.getNotesInDB();
+        this.state.categories.unshift(category);
       });
-      this.state.categories.unshift(category);
+      this.fullRender();
     });
-    this.fullRender();
-  });
 
   this.elements.forms.createCategoryForm.addEventListener('submit', event => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const nameCategory = formData.get('nameCategory');
+    const date = Date.now();
     event.target.reset();
 
     const category = new _category__WEBPACK_IMPORTED_MODULE_0__["default"]({
+      id: date,
       title: nameCategory || 'Без имени',
       onClick: (category) => {
         this.state.selectedCategory = category;
         // this.state.selectedCategory.htmlContainer.classList.add('checked');
         this.state.selectedCategory.init();
-      }
+      },
+      deleteCategory: (category) => this.state.categories = this.state.categories.filter(item => item !== category),
     });
 
     this.state.categories.unshift(category);
-    this.setToDB(category.state.id, nameCategory);
+
+    this.store.set('categories', category.state.id, {
+      id: category.state.id,
+      title: nameCategory,
+    });
     this.renderItem();
   });
 
@@ -104,44 +121,43 @@ App.prototype.init = function () {
   this.elements.buttons.addImageToNote.addEventListener('change', (event) => {
     const data = null;
     (0,_util__WEBPACK_IMPORTED_MODULE_1__.getBase64)(event.target.files[0], (base64Data) => {
-      console.log(base64Data);
       this.state.selectedCategory.state.selectedNote.addImage(base64Data);
     });
   });
 
-  this.elements.buttons.switchEnglichLanguage.addEventListener('click', () => i18next__WEBPACK_IMPORTED_MODULE_2__["default"].changeLanguage('en'));
-  this.elements.buttons.switchRussianLanguage.addEventListener('click', () => i18next__WEBPACK_IMPORTED_MODULE_2__["default"].changeLanguage('ru'));
+  // this.elements.buttons.switchEnglichLanguage.addEventListener('click', () => i18next.changeLanguage('en'));
+  // this.elements.buttons.switchRussianLanguage.addEventListener('click', () => i18next.changeLanguage('ru'));
 
   this.fullRender();
 }
 
-App.prototype.dbConnect = async function () {
-  this.state.DB = this.state.DB || await new _indexedDB__WEBPACK_IMPORTED_MODULE_3__["default"](
-    'Notes',
-    1,
-    (db, oldVersion, newVersion) => {
-      // обновление базы данных
-      switch (oldVersion) {
-        case 0: {
-          db.createObjectStore('categories');
-        }
-      }
-    });
-
-  return this.state.DB;
-}
-
-App.prototype.setToDB = async function (name, value) {
-  // обновление базы данных
-  const db = await this.dbConnect();
-  await db.set('categories', name, value);
-}
-
-App.prototype.getCategoriesInDB = async function () {
-    const db = await this.dbConnect();
-
-    return await db.getAllCategory('categories');
-}
+// App.prototype.dbConnect = async function () {
+//   this.state.DB = this.state.DB || await new IndexedDB(
+//     'Notes',
+//     1,
+//     (db, oldVersion, newVersion) => {
+//       // обновление базы данных
+//       switch (oldVersion) {
+//         case 0: {
+//           db.createObjectStore('categories');
+//         }
+//       }
+//     });
+//
+//   return this.state.DB;
+// }
+//
+// App.prototype.setToDB = async function (name, value) {
+//   // обновление базы данных
+//   const db = await this.dbConnect();
+//   await db.set('categories', name, value);
+// }
+//
+// App.prototype.getCategoriesInDB = async function () {
+//     const db = await this.dbConnect();
+//
+//     return await db.getAllCategory('categories');
+// }
 
 App.prototype.fullRender = function () {
   this.elements.listCategory.innerHTML = '';
@@ -170,6 +186,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./util */ "./scripts/util.js");
 /* harmony import */ var _note__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./note */ "./scripts/note.js");
 /* harmony import */ var on_change__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! on-change */ "./node_modules/on-change/index.js");
+/* harmony import */ var _store_store__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./store/store */ "./scripts/store/store.js");
+
 
 
 
@@ -178,30 +196,59 @@ __webpack_require__.r(__webpack_exports__);
 
 function Category(params) {
   this.state = {
-    id: Date.now(),
+    id: params.id,
     title: params.title,
     notes: [],
-    onClick: params.onClick,
     sortedNote: false,
     selectedNote: null,
+    onClick: params.onClick,
+    deleteCategory: params.deleteCategory,
   };
 
   this.htmlContainer = this.renderCategory();
+  this.store = new _store_store__WEBPACK_IMPORTED_MODULE_3__["default"]();
 }
 
 Category.prototype.init = function () {
   this.elements = {
     listNote: document.getElementById('noteList'),
   };
-
   // this.watchedState = onChange(this.state, (value) => this.htmlContainer = this.renderCategory());
-  // this.elements.listNote.innerHTML = '';
-    this.renderAllNote();
+  this.renderAllNote();
+}
+
+Category.prototype.getNotesInDB = function () {
+  this.store.getByIndex('notes', 'idCategory', this.state.id)
+    .then(result => {
+      result.forEach(item => {
+        const note = new _note__WEBPACK_IMPORTED_MODULE_1__["default"]({
+          idCategory: this.state.id,
+          title: item.title,
+          content: item.content,
+          date: item.date,
+          onClick: (note) => {
+            this.state.selectedNote = note;
+            this.state.selectedNote.init();
+          },
+        });
+
+        this.addNote(note);
+        console.log(note);
+        this.htmlContainer.children[1].textContent = this.state.notes.length;
+      });
+    });
+
 }
 
 Category.prototype.delete = function () {
+  //удаление со страницы
   this.state.notes = [];
   this.htmlContainer.remove();
+  //удаление из хранилища
+  this.store.deleteItem('categories', this.state.id);
+  this.store.deleteNotes('notes', 'idCategory', this.state.id);
+  //удаление из state приложения
+  this.state.deleteCategory(this);
 }
 
 /**
@@ -219,17 +266,24 @@ Category.prototype.addNote = function (note) {
 }
 
 Category.prototype.createNewNote = function () {
+  const date = Date.now();
   const newNote = new _note__WEBPACK_IMPORTED_MODULE_1__["default"]({
     idCategory: this.state.id,
-    date: (0,_util__WEBPACK_IMPORTED_MODULE_0__.getDate)(),
+    date: date,
     onClick: (note) => {
       this.state.selectedNote = note;
       this.state.selectedNote.init();
     },
   });
   this.addNote(newNote);
-  this.renderNewNote();
   this.renderAllNote();
+
+  this.store.set('notes', date, {
+    idCategory: this.state.id,
+    date: newNote.state.date,
+    title: newNote.state.title,
+    content: newNote.state.content,
+  });
   //меняем количество заметок в категории
   this.htmlContainer.children[1].textContent = this.state.notes.length;
 }
@@ -334,10 +388,6 @@ Category.prototype.renderCategory = function () {
   return category;
 }
 
-Category.prototype.renderNewNote = function () {
-  const note = this.state.notes[0];
-}
-
 Category.prototype.renderAllNote = function () {
   this.elements.listNote.innerHTML = '';
   if(!this.state.notes.length){
@@ -354,117 +404,6 @@ Category.prototype.renderAllNote = function () {
 
 /***/ }),
 
-/***/ "./scripts/indexedDB.js":
-/*!******************************!*\
-  !*** ./scripts/indexedDB.js ***!
-  \******************************/
-/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
-
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "default": () => (/* binding */ IndexedDB)
-/* harmony export */ });
-function IndexedDB(dbName, dbVersion, dbUpgrade) {
-  this.dbName = dbName;
-  this.dbVersion = dbVersion;
-  this.dbUpgrade = dbUpgrade;
-
-  return new Promise((resolve, reject) => {
-
-    // объект базы данных
-    this.db = null;
-
-    // если не поддерживается IndexedDB
-    if (!('indexedDB' in window)) reject('not supported');
-
-    // открытие базы данных
-    const dbOpen = indexedDB.open(this.dbName, this.dbVersion);
-
-    if (this.dbUpgrade) {
-
-      // database upgrade event
-      dbOpen.onupgradeneeded = e => {
-        this.dbUpgrade(dbOpen.result, e.oldVersion, e.newVersion);
-      };
-    }
-
-    dbOpen.onsuccess = () => {
-      this.db = dbOpen.result;
-      resolve(this);
-    };
-
-    dbOpen.onerror = e => {
-      reject(`IndexedDB error: ${e.target.errorCode}`);
-    };
-
-  });
-
-}
-
-IndexedDB.prototype.set = function (storeName, name, value) {
-  return new Promise((resolve, reject) => {
-
-    // новая транзакция
-    const
-      transaction = this.db.transaction(storeName, 'readwrite'),
-      store = transaction.objectStore(storeName);
-    console.log(name, value);
-    // запись в базу
-    store.put(value, name);
-
-    transaction.oncomplete = () => {
-      resolve(true);
-    };
-
-    transaction.onerror = () => {
-      reject(transaction.error);
-    };
-
-  });
-}
-
-IndexedDB.prototype.get = function (storeName, name) {
-  return new Promise((resolve, reject) => {
-
-    // новая транзакция
-    const transaction = this.db.transaction(storeName, 'readonly');
-    const store = transaction.objectStore(storeName);
-
-    // чтение из базы
-    const request = store.get(name);
-
-    request.onsuccess = () => {
-      resolve(request.result);
-    };
-
-    request.onerror = () => {
-      reject(request.error);
-    };
-  });
-}
-
-IndexedDB.prototype.getAllCategory = function (storeName) {
-  return new Promise((resolve, reject) => {
-    //новая транзакция
-    const transaction = this.db.transaction(storeName, 'readonly');
-    const store = transaction.objectStore(storeName);
-
-    //чтение из базы
-    const request = store.getAll();
-
-    request.onsuccess = () => {
-      resolve(request.result);
-    };
-
-    request.onerror = () => {
-      reject(request.error);
-    };
-
-  })
-}
-
-/***/ }),
-
 /***/ "./scripts/note.js":
 /*!*************************!*\
   !*** ./scripts/note.js ***!
@@ -477,19 +416,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./util */ "./scripts/util.js");
 /* harmony import */ var _category__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./category */ "./scripts/category.js");
+/* harmony import */ var _store_store__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./store/store */ "./scripts/store/store.js");
+
 
 
 
 function Note(params) {
   this.state = {
     idCategory: params.idCategory,
-    title: ``,
-    content: ``,
+    title: params.title || ``,
+    content: params.content || ``,
     date: params.date,
     onClick: params.onClick,
   };
   this.htmlContainer = this.render();
   this.noteContent = this.renderNoteContent();
+  this.store = new _store_store__WEBPACK_IMPORTED_MODULE_2__["default"]();
 }
 
 Note.prototype.init = function () {
@@ -504,11 +446,18 @@ Note.prototype.init = function () {
 Note.prototype.delete = function () {
   this.htmlContainer.remove();
   this.noteContent.remove();
+  this.store.deleteItem('notes', this.state.date);
 }
 
 Note.prototype.addImage = function (source) {
   this.state.content += `<img src="${source}">`;
   this.noteContent = this.renderNoteContent();
+  this.store.set('notes', this.state.date, {
+    idCategory: this.state.idCategory,
+    date: this.state.date,
+    title: this.state.title,
+    content: this.state.content,
+  });
   this.init();
 }
 
@@ -520,7 +469,7 @@ Note.prototype.render = function () {
 
   const dateNote = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('span', {
     className: 'note-date',
-    textContent: `${this.state.date}`
+    textContent: `${(0,_util__WEBPACK_IMPORTED_MODULE_0__.getDate)(this.state.date)}`
   });
 
   const shortDescription = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('p', {
@@ -548,7 +497,7 @@ Note.prototype.render = function () {
 Note.prototype.renderNoteContent = function () {
   const noteDate = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
     className: 'note-content-date',
-    textContent: `${this.state.date}`
+    textContent: `${(0,_util__WEBPACK_IMPORTED_MODULE_0__.getDate)(this.state.date)}`
   });
 
   const noteTitleInput = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
@@ -558,6 +507,12 @@ Note.prototype.renderNoteContent = function () {
     placeholder: 'Название заметки',
     oninput: (event) => {
       this.state.title = event.target.textContent;
+      this.store.set('notes', this.state.date, {
+        idCategory: this.state.idCategory,
+        date: this.state.date,
+        title: this.state.title,
+        content: this.state.content,
+      });
       this.htmlContainer = this.render();
     }
   });
@@ -568,6 +523,12 @@ Note.prototype.renderNoteContent = function () {
     placeholder: 'Текст заметки',
     oninput: (event) => {
       this.state.content = event.target.innerHTML;
+      this.store.set('notes', this.state.date, {
+        idCategory: this.state.idCategory,
+        date: this.state.date,
+        title: this.state.title,
+        content: this.state.content,
+      });
       this.htmlContainer = this.render();
     }
   });
@@ -584,7 +545,257 @@ Note.prototype.renderNoteContent = function () {
   return noteContentWrapper;
 }
 
+/***/ }),
 
+/***/ "./scripts/store/indexedDB.js":
+/*!************************************!*\
+  !*** ./scripts/store/indexedDB.js ***!
+  \************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ IndexedDB)
+/* harmony export */ });
+function IndexedDB(dbName, dbVersion, dbUpgrade) {
+  this.dbName = dbName;
+  this.dbVersion = dbVersion;
+  this.dbUpgrade = dbUpgrade;
+
+  return new Promise((resolve, reject) => {
+
+    // объект базы данных
+    this.db = null;
+
+    // если не поддерживается IndexedDB
+    if (!('indexedDB' in window)) reject('not supported');
+
+    // открытие базы данных
+    const dbOpen = indexedDB.open(this.dbName, this.dbVersion);
+
+    if (this.dbUpgrade) {
+      // database upgrade event
+      dbOpen.onupgradeneeded = e => {
+        this.dbUpgrade(dbOpen.result, e.oldVersion, e.newVersion);
+      };
+    }
+
+    dbOpen.onsuccess = () => {
+      this.db = dbOpen.result;
+      resolve(this);
+    };
+
+    dbOpen.onerror = e => {
+      reject(`IndexedDB error: ${e.target.errorCode}`);
+    };
+  });
+}
+
+IndexedDB.prototype.set = function (storeName, name, value) {
+  return new Promise((resolve, reject) => {
+    // новая транзакция
+    const transaction = this.db.transaction(storeName, 'readwrite');
+    const store = transaction.objectStore(storeName);
+    // запись в базу
+    store.put(value, name);
+
+    transaction.oncomplete = () => {
+      resolve(true);
+    };
+
+    transaction.onerror = () => {
+      reject(transaction.error);
+    };
+  });
+}
+
+IndexedDB.prototype.get = function (storeName, name) {
+  return new Promise((resolve, reject) => {
+    // новая транзакция
+    const transaction = this.db.transaction(storeName, 'readonly');
+    const store = transaction.objectStore(storeName);
+
+    // чтение из базы
+    const request = store.get(name);
+
+    request.onsuccess = () => {
+      resolve(request.result);
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+  });
+}
+
+/**
+ *
+ */
+
+IndexedDB.prototype.getAll = function (storeName, searchName) {
+  return new Promise((resolve, reject) => {
+    //новая транзакция
+    const transaction = this.db.transaction(storeName, 'readonly');
+    const store = transaction.objectStore(storeName);
+    let request = null;
+    //чтение из базы
+    if (searchName) {
+      request = store.getAll(searchName);
+    } else {
+      request = store.getAll();
+    }
+
+    request.onsuccess = () => {
+      resolve(request.result);
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+  })
+}
+
+/**
+ *
+ */
+
+IndexedDB.prototype.getByIndex = function (storeName, nameIndex, value) {
+  return new Promise((resolve, reject) => {
+    //новая транзакция
+    const transaction = this.db.transaction(storeName, 'readonly');
+    const store = transaction.objectStore(storeName);
+    const index = store.index(nameIndex);
+    const request = index.getAll(value);
+
+    request.onsuccess = () => {
+      resolve(request.result);
+    };
+
+    request.onerror = () => {
+      reject(request.error);
+    };
+  })
+}
+
+/**
+ *
+ */
+
+IndexedDB.prototype.deleteEntry = function (storeName, id) {
+  return new Promise((resolve, reject) => {
+    const transaction = this.db.transaction(storeName, 'readwrite');
+    const store = transaction.objectStore(storeName);
+
+    // запись в базу
+    store.delete(id);
+
+    transaction.oncomplete = () => {
+      resolve(true);
+    };
+
+    transaction.onerror = () => {
+      reject(transaction.error);
+    };
+  });
+}
+
+IndexedDB.prototype.deleteMultipleEntries = function (storeName, nameIndex, indexValue) {
+  return new Promise((resolve, reject) => {
+    //новая транзакция
+    const transaction = this.db.transaction(storeName, 'readwrite');
+    const store = transaction.objectStore(storeName);
+    const index = store.index(nameIndex);
+
+    const request = index.openKeyCursor(IDBKeyRange.only(indexValue));
+
+    request.onsuccess = () => {
+      let cursor = request.result;
+      if (cursor) {
+        store.delete(cursor.primaryKey);
+        cursor.continue();
+      }
+    };
+
+    transaction.oncomplete = () => {
+      resolve(true);
+    };
+
+    transaction.onerror = () => {
+      reject(transaction.error);
+    };
+  })
+}
+
+/***/ }),
+
+/***/ "./scripts/store/store.js":
+/*!********************************!*\
+  !*** ./scripts/store/store.js ***!
+  \********************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ Store)
+/* harmony export */ });
+/* harmony import */ var _indexedDB__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./indexedDB */ "./scripts/store/indexedDB.js");
+
+
+function Store(storeName) {
+  this.DB = null;
+}
+
+Store.prototype.dbConnect = async function () {
+  this.DB = this.DB || await new _indexedDB__WEBPACK_IMPORTED_MODULE_0__["default"](
+    'Notes',
+    1,
+    (db, oldVersion, newVersion) => {
+      // обновление базы данных
+      switch (oldVersion) {
+        case 0: {
+          let storeCategories = db.createObjectStore('categories');
+          let storeNotes = db.createObjectStore('notes');
+          storeNotes.createIndex('idCategory', 'idCategory');
+        }
+      }
+    });
+
+  return this.DB;
+}
+
+Store.prototype.set = async function (storeName, name, value) {
+  // обновление базы данных
+  const db = await this.dbConnect();
+  await db.set(storeName, name, value);
+}
+
+Store.prototype.get = async function (storName, name) {
+  const db = await this.dbConnect();
+
+  return await db.get(storeName, name);
+}
+
+Store.prototype.getAll = async function (storeName, seachName) {
+  const db = await this.dbConnect();
+
+  return await db.getAll(storeName, seachName);
+}
+
+Store.prototype.getByIndex = async function (storeName, nameIndex, value) {
+  const db = await  this.dbConnect();
+
+  return await db.getByIndex(storeName, nameIndex, value);
+}
+
+Store.prototype.deleteItem = async function (storeName, id) {
+  const db = await this.dbConnect();
+  await db.deleteEntry(storeName, id);
+}
+
+Store.prototype.deleteNotes = async function (storeName, index, id) {
+  const db = await this.dbConnect();
+  await db.deleteMultipleEntries(storeName, index, id);
+}
 
 /***/ }),
 
@@ -624,8 +835,8 @@ function createElement(tag, attributes) {
   return element;
 }
 
-function getDate() {
-  const dateNow = new Date();
+function getDate(date) {
+  const dateNow = new Date(date);
 
   return `${dateNow.toLocaleDateString()} ${dateNow.toLocaleTimeString()}`;
 }
