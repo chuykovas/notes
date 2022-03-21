@@ -16,10 +16,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _util__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./util */ "./scripts/util.js");
 /* harmony import */ var i18next__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! i18next */ "./node_modules/i18next/dist/esm/i18next.js");
 /* harmony import */ var _store_store__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./store/store */ "./scripts/store/store.js");
+/* harmony import */ var _note__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./note */ "./scripts/note.js");
 
 
 
-// import IndexedDB from './store/indexedDB';
+
 
 
 function App() {
@@ -35,13 +36,13 @@ App.prototype.init = function () {
   this.elements = {
     forms: {
       createCategoryForm: document.getElementById('createCategoryForm'),
+      searchForm: document.getElementById('searchForm'),
     },
     listCategory: document.getElementById('listCategory'),
+    listNotes: document.getElementById('noteList'),
     buttons: {
       createNoteButton: document.querySelector('.add-new-note'),
       sortCategory: document.getElementById('sortCategory'),
-      // switchRussianLanguage: document.getElementById('ru'),
-      // switchEnglichLanguage: document.getElementById('en'),
       addImageToNote: document.getElementById('addImage'),
       sortByDate: document.getElementById('sortByDate'),
       sortByName: document.getElementById('sortByName'),
@@ -50,50 +51,59 @@ App.prototype.init = function () {
 
   this.store = new _store_store__WEBPACK_IMPORTED_MODULE_3__["default"]();
 
+  let previousState = null;
+
+  this.store.getAll('general').
+    then(result => previousState = result[0]);
+
   this.store.getAll('categories')
     .then(result => {
       result.forEach(item => {
-        const category = new _category__WEBPACK_IMPORTED_MODULE_0__["default"]({
-          id: item.id,
-          title: item.title || 'Без имени',
-          onClick: (category) => {
-            this.state.selectedCategory = category;
-            this.state.categories.forEach(item => item.htmlContainer.classList.remove('checked'));
-            this.state.selectedCategory.htmlContainer.classList.add('checked');
-            this.state.selectedCategory.init();
-          },
-          onDelete: (category) => {
-            this.state.categories = this.state.categories.filter(item => item !== category);
-            this.state.selectedCategory = null;
-          }
-        });
-        category.getNotesInDB();
+        const category = this.createNewCategory(item.id, item.title);
+        this.store.getByIndex('notes', 'idCategory', category.state.id)
+          .then(result => {
+            result.forEach(item => {
+              const note = category.renderNote(category.state.id, item.title, item.content, item.date);
+              category.addNote(note);
+              category.htmlContainer.children[1].textContent = category.state.notes.length;
+              // console.log(item);
+            });
+          });
         this.state.categories.unshift(category);
+        if(previousState === item.id) {
+          this.state.selectedCategory = category;
+        }
       });
+      this.state.selectedCategory.htmlContainer.classList.add('checked');
+      this.state.selectedCategory.init();
+      // console.log(this.state.categories);
       this.fullRender();
     });
+
+  // console.log(this.state.categories);
+
+  this.elements.forms.searchForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+
+    const searchText = formData.get('searchInput');
+    console.log(searchText);
+    if (searchText){
+      this.search(searchText);
+    }
+
+  });
 
   this.elements.forms.createCategoryForm.addEventListener('submit', event => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const nameCategory = formData.get('nameCategory');
-    const date = Date.now();
     event.target.reset();
 
-    const category = new _category__WEBPACK_IMPORTED_MODULE_0__["default"]({
-      id: date,
-      title: nameCategory || 'Без имени',
-      onClick: (category) => {
-        this.state.selectedCategory = category;
-        this.state.categories.forEach(item => item.htmlContainer.classList.remove('checked'));
-        this.state.selectedCategory.htmlContainer.classList.add('checked');
-        this.state.selectedCategory.init();
-      },
-      onDelete: (category) => this.state.categories = this.state.categories.filter(item => item !== category),
-    });
+    const date = Date.now();
+    const category = this.createNewCategory(date, nameCategory);
 
     this.state.categories.unshift(category);
-
     this.store.set('categories', category.state.id, {
       id: category.state.id,
       title: nameCategory,
@@ -126,40 +136,7 @@ App.prototype.init = function () {
       this.state.selectedCategory.state.selectedNote.addImage(base64Data);
     });
   });
-
-  // this.elements.buttons.switchEnglichLanguage.addEventListener('click', () => i18next.changeLanguage('en'));
-  // this.elements.buttons.switchRussianLanguage.addEventListener('click', () => i18next.changeLanguage('ru'));
-
-  this.fullRender();
 }
-
-// App.prototype.dbConnect = async function () {
-//   this.state.DB = this.state.DB || await new IndexedDB(
-//     'Notes',
-//     1,
-//     (db, oldVersion, newVersion) => {
-//       // обновление базы данных
-//       switch (oldVersion) {
-//         case 0: {
-//           db.createObjectStore('categories');
-//         }
-//       }
-//     });
-//
-//   return this.state.DB;
-// }
-//
-// App.prototype.setToDB = async function (name, value) {
-//   // обновление базы данных
-//   const db = await this.dbConnect();
-//   await db.set('categories', name, value);
-// }
-//
-// App.prototype.getCategoriesInDB = async function () {
-//     const db = await this.dbConnect();
-//
-//     return await db.getAllCategory('categories');
-// }
 
 App.prototype.fullRender = function () {
   this.elements.listCategory.innerHTML = '';
@@ -172,6 +149,54 @@ App.prototype.renderItem = function () {
   this.elements.listCategory.prepend(category.htmlContainer);
 }
 
+App.prototype.createNewCategory = function (date, nameCategory) {
+  const category = new _category__WEBPACK_IMPORTED_MODULE_0__["default"]({
+    id: date,
+    title: nameCategory || 'Без имени',
+    onClick: (category) => {
+      this.state.selectedCategory = category;
+      this.state.categories.forEach(item => item.htmlContainer.classList.remove('checked'));
+      this.state.selectedCategory.htmlContainer.classList.add('checked');
+      this.state.selectedCategory.init();
+      this.store.set('general', 0, this.state.selectedCategory.state.id);
+    },
+    onDelete: (category) => this.state.categories = this.state.categories.filter(item => item !== category),
+  });
+
+  return category;
+}
+
+App.prototype.search = function (text) {
+  const regexp = new RegExp(`${text}`, 'gi');
+  this.elements.listNotes.innerHTML = '';
+  this.store.getAll('notes')
+    .then(result => {
+        result.forEach(item => {
+
+          if (item.title.toLowerCase().includes(text) || item.content.toLowerCase().includes(text)) {
+            item.title = item.title.replaceAll(regexp, `<mark>${text}</mark>`);
+            item.content = item.content.replaceAll(regexp, `<mark>${text}</mark>`);
+
+            const newNote = new _note__WEBPACK_IMPORTED_MODULE_4__["default"]({
+              title: item.title,
+              content: item.content,
+              date: item.date,
+              onClick: (note) => {
+                newNote.init();
+                // this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
+                // this.state.selectedNote.htmlContainer.classList.add('checked');
+              },
+              onDelete: (note) => {
+                this.state.notes = this.state.notes.filter(item => item !== note);
+              },
+            });
+
+            this.elements.listNotes.append(newNote.htmlContainer);
+          }
+        });
+    });
+
+}
 
 /***/ }),
 
@@ -214,37 +239,27 @@ function Category(params) {
 Category.prototype.init = function () {
   this.elements = {
     listNote: document.getElementById('noteList'),
+    listContent: document.getElementById('contentContainer'),
   };
-  // this.watchedState = onChange(this.state, (value) => this.htmlContainer = this.renderCategory());
+
   this.renderAllNote();
+
+  if(this.state.selectedNote){
+    this.state.selectedNote.init();
+  } else {
+    this.elements.listContent.innerHTML = '';
+  }
 }
 
 Category.prototype.getNotesInDB = function () {
   this.store.getByIndex('notes', 'idCategory', this.state.id)
     .then(result => {
       result.forEach(item => {
-        const note = new _note__WEBPACK_IMPORTED_MODULE_1__["default"]({
-          idCategory: this.state.id,
-          title: item.title,
-          content: item.content,
-          date: item.date,
-          onClick: (note) => {
-            this.state.selectedNote = note;
-            this.state.selectedNote.init();
-            this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
-            this.state.selectedNote.htmlContainer.classList.add('checked');
-          },
-          onDelete: (note) => {
-            this.state.notes = this.state.notes.filter(item => item !== note);
-          },
-        });
-
+        const note = this.renderNote(this.state.id, item.title, item.content, item.date);
         this.addNote(note);
-
         this.htmlContainer.children[1].textContent = this.state.notes.length;
       });
     });
-
 }
 
 Category.prototype.delete = function () {
@@ -266,6 +281,10 @@ Category.prototype.rename = function (newName) {
   this.state.title = newName;
   //меняем название категории
   this.htmlContainer.firstChild.textContent = this.state.title;
+  this.store.set('categories', this.state.id, {
+    id: this.state.id,
+    title: newName,
+  });
 }
 
 Category.prototype.addNote = function (note) {
@@ -274,21 +293,16 @@ Category.prototype.addNote = function (note) {
 
 Category.prototype.createNewNote = function () {
   const date = Date.now();
-  const newNote = new _note__WEBPACK_IMPORTED_MODULE_1__["default"]({
-    idCategory: this.state.id,
-    date: date,
-    onClick: (note) => {
-      this.state.selectedNote = note;
-      this.state.selectedNote.init();
-      this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
-      this.state.selectedNote.htmlContainer.classList.add('checked');
-    },
-    onDelete: (note) => {
-      this.state.notes = this.state.notes.filter(item => item !== note);
-    },
-  });
+  const newNote = this.renderNote(this.state.id, null, null, date);
+
   this.addNote(newNote);
+
+  this.state.selectedNote = newNote;
+  this.state.selectedNote.init();
+
   this.renderAllNote();
+
+
 
   this.store.set('notes', date, {
     idCategory: this.state.id,
@@ -315,7 +329,8 @@ Category.prototype.renderPopup = function () {
   const popupInputText = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('input', {
     className: 'popup-input',
     type: 'text',
-    placeholder: 'Введите название'
+    placeholder: 'Введите название',
+    autofocus: true,
   });
 
   const acceptButton = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('button', {
@@ -406,9 +421,35 @@ Category.prototype.renderAllNote = function () {
     this.elements.listNote.prepend(`В категории ${this.state.title} заметок нет`);
   } else {
     const notes = this.state.notes.map(item => item.htmlContainer);
+    if(this.state.selectedNote){
+      this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
+      this.state.selectedNote.htmlContainer.classList.add('checked');
+    }
     this.elements.listNote.prepend(...notes);
   }
 
+}
+
+Category.prototype.renderNote = function (id, title, content, date) {
+  const newNote = new _note__WEBPACK_IMPORTED_MODULE_1__["default"]({
+    idCategory: id,
+    title: title || '',
+    content: content || '',
+    date: date,
+    onClick: (note) => {
+      this.state.selectedNote = note;
+      this.state.selectedNote.init();
+      this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
+      this.state.selectedNote.htmlContainer.classList.add('checked');
+    },
+    onDelete: (note) => {
+      this.state.notes = this.state.notes.filter(item => item !== note);
+      this.htmlContainer.children[1].textContent = this.state.notes.length;
+    },
+    onUpdate: () => this.renderAllNote(),
+  });
+
+  return newNote;
 }
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Category);
@@ -436,11 +477,12 @@ __webpack_require__.r(__webpack_exports__);
 function Note(params) {
   this.state = {
     idCategory: params.idCategory,
-    title: params.title || ``,
-    content: params.content || ``,
+    title: params.title,
+    content: params.content,
     date: params.date,
     onClick: params.onClick,
     onDelete: params.onDelete,
+    onUpdate: params.onUpdate,
   };
   this.htmlContainer = this.render();
   this.noteContent = this.renderNoteContent();
@@ -477,7 +519,7 @@ Note.prototype.addImage = function (source) {
 Note.prototype.render = function () {
   const titleNote = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('h3', {
     className: 'note-title',
-    textContent: this.state.title || 'Заметка без названия'
+    innerHTML: this.state.title || 'Заметка без названия'
   });
 
   const dateNote = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('span', {
@@ -487,7 +529,7 @@ Note.prototype.render = function () {
 
   const shortDescription = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('p', {
     className: 'note-description',
-    textContent: this.state.content.substring(0, 25),
+    innerHTML: this.state.content.substring(0, 25),
   });
 
   shortDescription.prepend(dateNote);
@@ -519,7 +561,7 @@ Note.prototype.renderNoteContent = function () {
   const noteTitleInput = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
     className: 'note-content-title',
     contentEditable: 'true',
-    textContent: this.state.title,
+    innerHTML: this.state.title,
     placeholder: 'Название заметки',
     oninput: (event) => {
       this.state.title = event.target.textContent;
@@ -530,6 +572,7 @@ Note.prototype.renderNoteContent = function () {
         content: this.state.content,
       });
       this.htmlContainer = this.render();
+      this.state.onUpdate();
     }
   });
 
@@ -537,6 +580,7 @@ Note.prototype.renderNoteContent = function () {
     className: 'note-content-text',
     contentEditable: 'true',
     placeholder: 'Текст заметки',
+    innerHTML: this.state.content,
     oninput: (event) => {
       this.state.content = event.target.innerHTML;
       this.store.set('notes', this.state.date, {
@@ -546,10 +590,9 @@ Note.prototype.renderNoteContent = function () {
         content: this.state.content,
       });
       this.htmlContainer = this.render();
+      this.state.onUpdate();
     }
   });
-
-  noteTextInput.innerHTML = this.state.content;
 
   const noteContentWrapper = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
     className: 'note-content-body',
@@ -806,6 +849,7 @@ Store.prototype.dbConnect = async function () {
         case 0: {
           let storeCategories = db.createObjectStore('categories');
           let storeNotes = db.createObjectStore('notes');
+          let storeGeneral = db.createObjectStore('general');
           storeNotes.createIndex('idCategory', 'idCategory');
         }
       }
@@ -873,7 +917,7 @@ __webpack_require__.r(__webpack_exports__);
 function createElement(tag, attributes) {
   const element = document.createElement(tag);
 
-  if(attributes) {
+  if (attributes) {
     Object.keys(attributes).forEach(key => {
       if (tag === 'div' && key === 'placeholder') {
         element.setAttribute(key, attributes[key])
@@ -898,7 +942,7 @@ function getDate(date) {
  * @returns {*}
  */
 
-function getBase64 (file, callback) {
+function getBase64(file, callback) {
 
   const reader = new FileReader();
 
@@ -915,8 +959,14 @@ function getBase64 (file, callback) {
  */
 function compare(key, order = 'ascending') {
   return function (a, b) {
-    const firstName = a.state[key].toUpperCase();
-    const secondName = b.state[key].toUpperCase();
+    const firstName = a.state[key];
+    const secondName = b.state[key];
+
+    if (firstName.typeof === 'string' && secondName.typeof === 'string') {
+      firstName = firstName.toUpperCase();
+      secondName = secondName.toUpperCase();
+    }
+
     let comparison = 0;
 
     if (firstName > secondName) {

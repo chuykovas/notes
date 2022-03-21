@@ -5,11 +5,12 @@ import Store from './store/store';
 export default function Note(params) {
   this.state = {
     idCategory: params.idCategory,
-    title: params.title || ``,
-    content: params.content || ``,
+    title: params.title,
+    content: params.content,
     date: params.date,
     onClick: params.onClick,
     onDelete: params.onDelete,
+    onUpdate: params.onUpdate,
   };
   this.htmlContainer = this.render();
   this.noteContent = this.renderNoteContent();
@@ -46,7 +47,7 @@ Note.prototype.addImage = function (source) {
 Note.prototype.render = function () {
   const titleNote = createElement('h3', {
     className: 'note-title',
-    textContent: this.state.title || 'Заметка без названия'
+    innerHTML: this.state.title || 'Заметка без названия'
   });
 
   const dateNote = createElement('span', {
@@ -56,7 +57,7 @@ Note.prototype.render = function () {
 
   const shortDescription = createElement('p', {
     className: 'note-description',
-    textContent: this.state.content.substring(0, 25),
+    innerHTML: this.state.content.substring(0, 25),
   });
 
   shortDescription.prepend(dateNote);
@@ -88,7 +89,7 @@ Note.prototype.renderNoteContent = function () {
   const noteTitleInput = createElement('div', {
     className: 'note-content-title',
     contentEditable: 'true',
-    textContent: this.state.title,
+    innerHTML: this.state.title,
     placeholder: 'Название заметки',
     oninput: (event) => {
       this.state.title = event.target.textContent;
@@ -99,6 +100,7 @@ Note.prototype.renderNoteContent = function () {
         content: this.state.content,
       });
       this.htmlContainer = this.render();
+      this.state.onUpdate();
     }
   });
 
@@ -106,6 +108,7 @@ Note.prototype.renderNoteContent = function () {
     className: 'note-content-text',
     contentEditable: 'true',
     placeholder: 'Текст заметки',
+    innerHTML: this.state.content,
     oninput: (event) => {
       this.state.content = event.target.innerHTML;
       this.store.set('notes', this.state.date, {
@@ -115,10 +118,9 @@ Note.prototype.renderNoteContent = function () {
         content: this.state.content,
       });
       this.htmlContainer = this.render();
+      this.state.onUpdate();
     }
   });
-
-  noteTextInput.innerHTML = this.state.content;
 
   const noteContentWrapper = createElement('div', {
     className: 'note-content-body',

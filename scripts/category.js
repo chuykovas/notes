@@ -23,37 +23,27 @@ function Category(params) {
 Category.prototype.init = function () {
   this.elements = {
     listNote: document.getElementById('noteList'),
+    listContent: document.getElementById('contentContainer'),
   };
-  // this.watchedState = onChange(this.state, (value) => this.htmlContainer = this.renderCategory());
+
   this.renderAllNote();
+
+  if(this.state.selectedNote){
+    this.state.selectedNote.init();
+  } else {
+    this.elements.listContent.innerHTML = '';
+  }
 }
 
 Category.prototype.getNotesInDB = function () {
   this.store.getByIndex('notes', 'idCategory', this.state.id)
     .then(result => {
       result.forEach(item => {
-        const note = new Note({
-          idCategory: this.state.id,
-          title: item.title,
-          content: item.content,
-          date: item.date,
-          onClick: (note) => {
-            this.state.selectedNote = note;
-            this.state.selectedNote.init();
-            this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
-            this.state.selectedNote.htmlContainer.classList.add('checked');
-          },
-          onDelete: (note) => {
-            this.state.notes = this.state.notes.filter(item => item !== note);
-          },
-        });
-
+        const note = this.renderNote(this.state.id, item.title, item.content, item.date);
         this.addNote(note);
-
         this.htmlContainer.children[1].textContent = this.state.notes.length;
       });
     });
-
 }
 
 Category.prototype.delete = function () {
@@ -75,6 +65,10 @@ Category.prototype.rename = function (newName) {
   this.state.title = newName;
   //меняем название категории
   this.htmlContainer.firstChild.textContent = this.state.title;
+  this.store.set('categories', this.state.id, {
+    id: this.state.id,
+    title: newName,
+  });
 }
 
 Category.prototype.addNote = function (note) {
@@ -83,21 +77,16 @@ Category.prototype.addNote = function (note) {
 
 Category.prototype.createNewNote = function () {
   const date = Date.now();
-  const newNote = new Note({
-    idCategory: this.state.id,
-    date: date,
-    onClick: (note) => {
-      this.state.selectedNote = note;
-      this.state.selectedNote.init();
-      this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
-      this.state.selectedNote.htmlContainer.classList.add('checked');
-    },
-    onDelete: (note) => {
-      this.state.notes = this.state.notes.filter(item => item !== note);
-    },
-  });
+  const newNote = this.renderNote(this.state.id, null, null, date);
+
   this.addNote(newNote);
+
+  this.state.selectedNote = newNote;
+  this.state.selectedNote.init();
+
   this.renderAllNote();
+
+
 
   this.store.set('notes', date, {
     idCategory: this.state.id,
@@ -124,7 +113,8 @@ Category.prototype.renderPopup = function () {
   const popupInputText = createElement('input', {
     className: 'popup-input',
     type: 'text',
-    placeholder: 'Введите название'
+    placeholder: 'Введите название',
+    autofocus: true,
   });
 
   const acceptButton = createElement('button', {
@@ -215,9 +205,35 @@ Category.prototype.renderAllNote = function () {
     this.elements.listNote.prepend(`В категории ${this.state.title} заметок нет`);
   } else {
     const notes = this.state.notes.map(item => item.htmlContainer);
+    if(this.state.selectedNote){
+      this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
+      this.state.selectedNote.htmlContainer.classList.add('checked');
+    }
     this.elements.listNote.prepend(...notes);
   }
 
+}
+
+Category.prototype.renderNote = function (id, title, content, date) {
+  const newNote = new Note({
+    idCategory: id,
+    title: title || '',
+    content: content || '',
+    date: date,
+    onClick: (note) => {
+      this.state.selectedNote = note;
+      this.state.selectedNote.init();
+      this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
+      this.state.selectedNote.htmlContainer.classList.add('checked');
+    },
+    onDelete: (note) => {
+      this.state.notes = this.state.notes.filter(item => item !== note);
+      this.htmlContainer.children[1].textContent = this.state.notes.length;
+    },
+    onUpdate: () => this.renderAllNote(),
+  });
+
+  return newNote;
 }
 
 export default Category;

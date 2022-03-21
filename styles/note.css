@@ -6,6 +6,10 @@
   border-radius: 10px;
 }
 
+.note h3{
+  padding-bottom: 5px;
+}
+
 .note:hover {
   opacity: 0.7;
 }
@@ -41,12 +45,12 @@
 }
 
 .note-description {
-  width: 400px;
   color: #5d5d5d;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 .note-date {
   padding-right: 10px;
 }

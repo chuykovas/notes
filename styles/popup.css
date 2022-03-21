@@ -7,6 +7,7 @@
   background: rgba(0, 0, 0, .5);
   z-index: 100;
 }
+
 .popup-form {
   display: flex;
   flex-wrap: wrap;
@@ -21,6 +22,7 @@
   border: 1px solid #ccc;
   background: #fff;
 }
+
 .popup-input{
   width: 60%;
   flex-grow: 1;
@@ -30,9 +32,11 @@
   border: none;
   text-align: center;
 }
+
 .popup-input:focus{
   outline: none;
 }
+
 .popup-button{
   padding: 5px;
   background: transparent;

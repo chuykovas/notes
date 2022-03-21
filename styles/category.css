@@ -7,6 +7,7 @@
   font-weight: normal;
   border-radius: 10px;
 }
+
 .category:before{
   content: '\f07b';
   font-family: "Font Awesome 5 Free";
@@ -23,9 +24,9 @@
 .notes-count{
   margin-left: auto;
 }
+
 .category:hover {
   background: #ccc;
-  /*opacity: 0.7;*/
   z-index: 99;
 }
 
@@ -33,19 +34,21 @@
   background: #c9c8c9;
 }
 
-.content .kebab-menu-button{
+.content .kebab-menu-button {
   display: none;
   padding-left: 10px;
   border: none;
   background: transparent;
   cursor: pointer;
-  transition: all 0.25s ease-out;
+  transition: all 0.3s ease;
 }
+
 .content .kebab-menu-button:before{
   content: '\f142';
   font-family: "Font Awesome 5 Free";
   font-weight: bold;
 }
+
 .category:hover .kebab-menu-button{
   display: block;
 }

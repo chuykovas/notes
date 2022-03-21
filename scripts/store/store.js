@@ -14,6 +14,7 @@ Store.prototype.dbConnect = async function () {
         case 0: {
           let storeCategories = db.createObjectStore('categories');
           let storeNotes = db.createObjectStore('notes');
+          let storeGeneral = db.createObjectStore('general');
           storeNotes.createIndex('idCategory', 'idCategory');
         }
       }

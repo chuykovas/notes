@@ -1,8 +1,8 @@
 import Category from './category';
 import {createElement, getDate, compare, getBase64} from './util';
 import i18next from 'i18next';
-// import IndexedDB from './store/indexedDB';
 import Store from './store/store';
+import Note from './note';
 
 export default function App() {
   this.state = {
@@ -17,13 +17,13 @@ App.prototype.init = function () {
   this.elements = {
     forms: {
       createCategoryForm: document.getElementById('createCategoryForm'),
+      searchForm: document.getElementById('searchForm'),
     },
     listCategory: document.getElementById('listCategory'),
+    listNotes: document.getElementById('noteList'),
     buttons: {
       createNoteButton: document.querySelector('.add-new-note'),
       sortCategory: document.getElementById('sortCategory'),
-      // switchRussianLanguage: document.getElementById('ru'),
-      // switchEnglichLanguage: document.getElementById('en'),
       addImageToNote: document.getElementById('addImage'),
       sortByDate: document.getElementById('sortByDate'),
       sortByName: document.getElementById('sortByName'),
@@ -32,50 +32,59 @@ App.prototype.init = function () {
 
   this.store = new Store();
 
+  let previousState = null;
+
+  this.store.getAll('general').
+    then(result => previousState = result[0]);
+
   this.store.getAll('categories')
     .then(result => {
       result.forEach(item => {
-        const category = new Category({
-          id: item.id,
-          title: item.title || 'Без имени',
-          onClick: (category) => {
-            this.state.selectedCategory = category;
-            this.state.categories.forEach(item => item.htmlContainer.classList.remove('checked'));
-            this.state.selectedCategory.htmlContainer.classList.add('checked');
-            this.state.selectedCategory.init();
-          },
-          onDelete: (category) => {
-            this.state.categories = this.state.categories.filter(item => item !== category);
-            this.state.selectedCategory = null;
-          }
-        });
-        category.getNotesInDB();
+        const category = this.createNewCategory(item.id, item.title);
+        this.store.getByIndex('notes', 'idCategory', category.state.id)
+          .then(result => {
+            result.forEach(item => {
+              const note = category.renderNote(category.state.id, item.title, item.content, item.date);
+              category.addNote(note);
+              category.htmlContainer.children[1].textContent = category.state.notes.length;
+              // console.log(item);
+            });
+          });
         this.state.categories.unshift(category);
+        if(previousState === item.id) {
+          this.state.selectedCategory = category;
+        }
       });
+      this.state.selectedCategory.htmlContainer.classList.add('checked');
+      this.state.selectedCategory.init();
+      // console.log(this.state.categories);
       this.fullRender();
     });
+
+  // console.log(this.state.categories);
+
+  this.elements.forms.searchForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+
+    const searchText = formData.get('searchInput');
+    console.log(searchText);
+    if (searchText){
+      this.search(searchText);
+    }
+
+  });
 
   this.elements.forms.createCategoryForm.addEventListener('submit', event => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const nameCategory = formData.get('nameCategory');
-    const date = Date.now();
     event.target.reset();
 
-    const category = new Category({
-      id: date,
-      title: nameCategory || 'Без имени',
-      onClick: (category) => {
-        this.state.selectedCategory = category;
-        this.state.categories.forEach(item => item.htmlContainer.classList.remove('checked'));
-        this.state.selectedCategory.htmlContainer.classList.add('checked');
-        this.state.selectedCategory.init();
-      },
-      onDelete: (category) => this.state.categories = this.state.categories.filter(item => item !== category),
-    });
+    const date = Date.now();
+    const category = this.createNewCategory(date, nameCategory);
 
     this.state.categories.unshift(category);
-
     this.store.set('categories', category.state.id, {
       id: category.state.id,
       title: nameCategory,
@@ -108,40 +117,7 @@ App.prototype.init = function () {
       this.state.selectedCategory.state.selectedNote.addImage(base64Data);
     });
   });
-
-  // this.elements.buttons.switchEnglichLanguage.addEventListener('click', () => i18next.changeLanguage('en'));
-  // this.elements.buttons.switchRussianLanguage.addEventListener('click', () => i18next.changeLanguage('ru'));
-
-  this.fullRender();
 }
-
-// App.prototype.dbConnect = async function () {
-//   this.state.DB = this.state.DB || await new IndexedDB(
-//     'Notes',
-//     1,
-//     (db, oldVersion, newVersion) => {
-//       // обновление базы данных
-//       switch (oldVersion) {
-//         case 0: {
-//           db.createObjectStore('categories');
-//         }
-//       }
-//     });
-//
-//   return this.state.DB;
-// }
-//
-// App.prototype.setToDB = async function (name, value) {
-//   // обновление базы данных
-//   const db = await this.dbConnect();
-//   await db.set('categories', name, value);
-// }
-//
-// App.prototype.getCategoriesInDB = async function () {
-//     const db = await this.dbConnect();
-//
-//     return await db.getAllCategory('categories');
-// }
 
 App.prototype.fullRender = function () {
   this.elements.listCategory.innerHTML = '';
@@ -152,4 +128,53 @@ App.prototype.fullRender = function () {
 App.prototype.renderItem = function () {
   const category = this.state.categories[0];
   this.elements.listCategory.prepend(category.htmlContainer);
+}
+
+App.prototype.createNewCategory = function (date, nameCategory) {
+  const category = new Category({
+    id: date,
+    title: nameCategory || 'Без имени',
+    onClick: (category) => {
+      this.state.selectedCategory = category;
+      this.state.categories.forEach(item => item.htmlContainer.classList.remove('checked'));
+      this.state.selectedCategory.htmlContainer.classList.add('checked');
+      this.state.selectedCategory.init();
+      this.store.set('general', 0, this.state.selectedCategory.state.id);
+    },
+    onDelete: (category) => this.state.categories = this.state.categories.filter(item => item !== category),
+  });
+
+  return category;
+}
+
+App.prototype.search = function (text) {
+  const regexp = new RegExp(`${text}`, 'gi');
+  this.elements.listNotes.innerHTML = '';
+  this.store.getAll('notes')
+    .then(result => {
+        result.forEach(item => {
+
+          if (item.title.toLowerCase().includes(text) || item.content.toLowerCase().includes(text)) {
+            item.title = item.title.replaceAll(regexp, `<mark>${text}</mark>`);
+            item.content = item.content.replaceAll(regexp, `<mark>${text}</mark>`);
+
+            const newNote = new Note({
+              title: item.title,
+              content: item.content,
+              date: item.date,
+              onClick: (note) => {
+                newNote.init();
+                // this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
+                // this.state.selectedNote.htmlContainer.classList.add('checked');
+              },
+              onDelete: (note) => {
+                this.state.notes = this.state.notes.filter(item => item !== note);
+              },
+            });
+
+            this.elements.listNotes.append(newNote.htmlContainer);
+          }
+        });
+    });
+
 }

@@ -6,10 +6,11 @@
         content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Notes</title>
-  <link
-      href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700|Old+Standard+TT&display=swap&subset=cyrillic"
-      rel="stylesheet">
-  <link href="./styles/style.css" rel="stylesheet">
+  <link rel="shortcut icon" type="image/png" href="assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles/style.css">
   <link rel="stylesheet" href="./styles/category.css">
   <link rel="stylesheet" href="./styles/note.css">
   <link rel="stylesheet" href="./styles/popup.css">
@@ -19,21 +20,22 @@
 <main class="content">
   <div class="category-list">
     <div class="buttons-wrapper">
-      <button class="sort-category-button category-button" id="sortCategory"><i class="fas fa-sort-alpha-down"></i></button>
+      <button class="sort-category-button category-button" id="sortCategory"><i class="fas fa-sort-alpha-down"></i>
+      </button>
     </div>
     <div class="category-list_content" id="listCategory"></div>
     <form class="add-category-form" id="createCategoryForm">
       <button class="add-button"><i class="fas fa-plus-circle"></i></button>
-      <input id="inputNameNewCategory" type="text" name="nameCategory" class="add-category-input" placeholder="Новая категория"/>
+      <input id="inputNameNewCategory" type="text" name="nameCategory" class="add-category-input"
+             placeholder="Новая категория"/>
     </form>
   </div>
-  <div class="note-list" >
+  <div class="note-list">
     <div class="note-list_header">
-      <form class="search-form">
-        <button class="search-button">
-          <img src="./assets/search.png" alt="search-icon" class="search-icon" width="24" height="24"/>
-        </button>
-        <input id="searchInput" class="search-input" type="search" placeholder="Поиск по заметкам"/>
+      <form class="search-form" id="searchForm">
+        <input id="searchInput" name="searchInput" class="search-input" type="search" placeholder="Поиск по заметкам"/>
+        <button class="search-button" id="searchButton"></button>
+        <button class="close-search-button" id="closeSearchButton"></button>
       </form>
       <div class="buttons-wrapper">
         <button id="sortByName"><i class="fas fa-sort-alpha-down"></i></button>
@@ -53,12 +55,12 @@
           <input class="upload-button-attach" id="addImage" type="file" accept=".jpg,.png,.gif,.bmp,.jpeg">
         </div>
       </div>
-<!--      <div class="switch-language">-->
-<!--        <button class="button-russian-language" id="ru">ru</button>-->
-<!--        <button class="button-english-language" id="en">en</button>-->
-<!--      </div>-->
+      <!--      <div class="switch-language">-->
+      <!--        <button class="button-russian-language" id="ru">ru</button>-->
+      <!--        <button class="button-english-language" id="en">en</button>-->
+      <!--      </div>-->
     </div>
-    <div class="note-content-container"></div>
+    <div class="note-content-container" id="contentContainer"></div>
   </div>
 </main>
 <div class="content-for-mobile">
