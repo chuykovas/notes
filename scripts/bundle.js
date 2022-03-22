@@ -46,6 +46,8 @@ App.prototype.init = function () {
       addImageToNote: document.getElementById('addImage'),
       sortByDate: document.getElementById('sortByDate'),
       sortByName: document.getElementById('sortByName'),
+      makeBoldText: document.getElementById('makeBold'),
+      makeItalicText: document.getElementById('makeItalic'),
     },
   }
 
@@ -54,33 +56,22 @@ App.prototype.init = function () {
   let previousState = null;
 
   this.store.getAll('general').
-    then(result => previousState = result[0]);
+    then(result => previousState = result[0].idSelectedCategory);
 
   this.store.getAll('categories')
     .then(result => {
       result.forEach(item => {
         const category = this.createNewCategory(item.id, item.title);
-        this.store.getByIndex('notes', 'idCategory', category.state.id)
-          .then(result => {
-            result.forEach(item => {
-              const note = category.renderNote(category.state.id, item.title, item.content, item.date);
-              category.addNote(note);
-              category.htmlContainer.children[1].textContent = category.state.notes.length;
-              // console.log(item);
-            });
-          });
+        category.getNotesInDB();
         this.state.categories.unshift(category);
         if(previousState === item.id) {
           this.state.selectedCategory = category;
         }
       });
+      this.fullRender();
       this.state.selectedCategory.htmlContainer.classList.add('checked');
       this.state.selectedCategory.init();
-      // console.log(this.state.categories);
-      this.fullRender();
     });
-
-  // console.log(this.state.categories);
 
   this.elements.forms.searchForm.addEventListener('submit', event => {
     event.preventDefault();
@@ -136,6 +127,14 @@ App.prototype.init = function () {
       this.state.selectedCategory.state.selectedNote.addImage(base64Data);
     });
   });
+
+  this.elements.buttons.makeBoldText.addEventListener('click', () => {
+    document.execCommand('bold', false, null);
+  });
+
+  this.elements.buttons.makeItalicText.addEventListener('click', () => {
+    document.execCommand('italic', false, null);
+  })
 }
 
 App.prototype.fullRender = function () {
@@ -158,7 +157,7 @@ App.prototype.createNewCategory = function (date, nameCategory) {
       this.state.categories.forEach(item => item.htmlContainer.classList.remove('checked'));
       this.state.selectedCategory.htmlContainer.classList.add('checked');
       this.state.selectedCategory.init();
-      this.store.set('general', 0, this.state.selectedCategory.state.id);
+      this.store.set('general', 0, {idSelectedCategory: this.state.selectedCategory.state.id});
     },
     onDelete: (category) => this.state.categories = this.state.categories.filter(item => item !== category),
   });
@@ -183,8 +182,6 @@ App.prototype.search = function (text) {
               date: item.date,
               onClick: (note) => {
                 newNote.init();
-                // this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
-                // this.state.selectedNote.htmlContainer.classList.add('checked');
               },
               onDelete: (note) => {
                 this.state.notes = this.state.notes.filter(item => item !== note);
@@ -252,12 +249,23 @@ Category.prototype.init = function () {
 }
 
 Category.prototype.getNotesInDB = function () {
+  let previousSelectedNote = null;
+
+  this.store.getAll('general').
+  then(result => previousSelectedNote = result[0].idSelectedNote);
+
   this.store.getByIndex('notes', 'idCategory', this.state.id)
     .then(result => {
       result.forEach(item => {
         const note = this.renderNote(this.state.id, item.title, item.content, item.date);
         this.addNote(note);
         this.htmlContainer.children[1].textContent = this.state.notes.length;
+
+        if(item.date === previousSelectedNote) {
+          this.state.selectedNote = note;
+          this.state.selectedNote.init();
+          this.renderAllNote();
+        }
       });
     });
 }
@@ -300,9 +308,12 @@ Category.prototype.createNewNote = function () {
   this.state.selectedNote = newNote;
   this.state.selectedNote.init();
 
+  this.store.set('general', 0, {
+    idSelectedCategory: this.state.id,
+    idSelectedNote: this.state.selectedNote.state.date,
+  });
+
   this.renderAllNote();
-
-
 
   this.store.set('notes', date, {
     idCategory: this.state.id,
@@ -441,6 +452,11 @@ Category.prototype.renderNote = function (id, title, content, date) {
       this.state.selectedNote.init();
       this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
       this.state.selectedNote.htmlContainer.classList.add('checked');
+
+      this.store.set('general', 0, {
+        idSelectedCategory: this.state.id,
+        idSelectedNote: this.state.selectedNote.state.date,
+      });
     },
     onDelete: (note) => {
       this.state.notes = this.state.notes.filter(item => item !== note);

@@ -6,6 +6,7 @@
   padding: 10px;
   font-weight: normal;
   border-radius: 10px;
+  user-select: none;
 }
 
 .category:before{

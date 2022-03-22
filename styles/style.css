@@ -28,10 +28,13 @@ body, button, input {
 }
 
 .buttons-wrapper button {
+  padding-left: 10px;
   background: transparent;
   border: none;
   cursor: pointer;
   font-size: 20px;
+  font-family: "Font Awesome 5 Free";
+  font-weight: bold;
 }
 
 .category-list {
@@ -227,6 +230,7 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
 }
 
 .upload-button-wrapper {
+  position: relative;
   background-image: url('../assets/paperclip-solid.svg');
   background-repeat: no-repeat;
   background-size: contain;
@@ -234,7 +238,6 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
   width: 24px;
   height: 24px;
   overflow: hidden;
-  position: absolute;
 }
 
 .upload-button-attach {
@@ -247,6 +250,14 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
   height: 200%;
   opacity: 0;
   cursor: pointer;
+}
+
+.bold-button::before {
+  content: '\f032';
+}
+
+.italic-button::before {
+  content: '\f033';
 }
 
 

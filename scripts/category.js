@@ -36,12 +36,23 @@ Category.prototype.init = function () {
 }
 
 Category.prototype.getNotesInDB = function () {
+  let previousSelectedNote = null;
+
+  this.store.getAll('general').
+  then(result => previousSelectedNote = result[0].idSelectedNote);
+
   this.store.getByIndex('notes', 'idCategory', this.state.id)
     .then(result => {
       result.forEach(item => {
         const note = this.renderNote(this.state.id, item.title, item.content, item.date);
         this.addNote(note);
         this.htmlContainer.children[1].textContent = this.state.notes.length;
+
+        if(item.date === previousSelectedNote) {
+          this.state.selectedNote = note;
+          this.state.selectedNote.init();
+          this.renderAllNote();
+        }
       });
     });
 }
@@ -84,9 +95,12 @@ Category.prototype.createNewNote = function () {
   this.state.selectedNote = newNote;
   this.state.selectedNote.init();
 
+  this.store.set('general', 0, {
+    idSelectedCategory: this.state.id,
+    idSelectedNote: this.state.selectedNote.state.date,
+  });
+
   this.renderAllNote();
-
-
 
   this.store.set('notes', date, {
     idCategory: this.state.id,
@@ -225,6 +239,11 @@ Category.prototype.renderNote = function (id, title, content, date) {
       this.state.selectedNote.init();
       this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
       this.state.selectedNote.htmlContainer.classList.add('checked');
+
+      this.store.set('general', 0, {
+        idSelectedCategory: this.state.id,
+        idSelectedNote: this.state.selectedNote.state.date,
+      });
     },
     onDelete: (note) => {
       this.state.notes = this.state.notes.filter(item => item !== note);
