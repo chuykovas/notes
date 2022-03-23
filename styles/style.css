@@ -116,7 +116,7 @@ body, button, input {
   top: 50%;
   right: 0;
   transform: translate(0, -50%);
-  height: 100%;
+  height: 50%;
   padding-right: 18px;
   padding-left: 18px;
   cursor: pointer;

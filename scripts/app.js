@@ -1,8 +1,6 @@
 import Category from './category';
-import {createElement, getDate, compare, getBase64} from './util';
-import i18next from 'i18next';
+import {compare, getBase64} from './util';
 import Store from './store/store';
-import Note from './note';
 
 export default function App() {
   this.state = {
@@ -29,42 +27,33 @@ App.prototype.init = function () {
       sortByName: document.getElementById('sortByName'),
       makeBoldText: document.getElementById('makeBold'),
       makeItalicText: document.getElementById('makeItalic'),
+      closeSearchButton: document.getElementById('closeSearchButton'),
     },
   }
 
   this.store = new Store();
 
-  let previousState = null;
+  let previousSelectedCategory = '';
 
-  this.store.getAll('general').
-    then(result => previousState = result[0].idSelectedCategory);
+  this.store.getAll('general')
+    .then(result => previousSelectedCategory = result[0].idSelectedCategory);
 
   this.store.getAll('categories')
     .then(result => {
       result.forEach(item => {
         const category = this.createNewCategory(item.id, item.title);
-        category.getNotesInDB();
         this.state.categories.unshift(category);
-        if(previousState === item.id) {
+        if (previousSelectedCategory === item.id) {
           this.state.selectedCategory = category;
+          category.getNotesInDB('select');
+        } else {
+          category.getNotesInDB();
         }
       });
       this.fullRender();
       this.state.selectedCategory.htmlContainer.classList.add('checked');
       this.state.selectedCategory.init();
     });
-
-  this.elements.forms.searchForm.addEventListener('submit', event => {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-
-    const searchText = formData.get('searchInput');
-    console.log(searchText);
-    if (searchText){
-      this.search(searchText);
-    }
-
-  });
 
   this.elements.forms.createCategoryForm.addEventListener('submit', event => {
     event.preventDefault();
@@ -115,7 +104,24 @@ App.prototype.init = function () {
 
   this.elements.buttons.makeItalicText.addEventListener('click', () => {
     document.execCommand('italic', false, null);
-  })
+  });
+
+  this.elements.forms.searchForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const searchText = formData.get('searchInput');
+    if (searchText) {
+      this.search(searchText);
+      this.elements.buttons.closeSearchButton.style.display = 'block';
+    }
+  });
+
+  this.elements.buttons.closeSearchButton.addEventListener('click', event => {
+    event.preventDefault();
+    this.elements.forms.searchForm.reset();
+    this.fullRender();
+    this.state.selectedCategory.init();
+  });
 }
 
 App.prototype.fullRender = function () {
@@ -138,7 +144,10 @@ App.prototype.createNewCategory = function (date, nameCategory) {
       this.state.categories.forEach(item => item.htmlContainer.classList.remove('checked'));
       this.state.selectedCategory.htmlContainer.classList.add('checked');
       this.state.selectedCategory.init();
-      this.store.set('general', 0, {idSelectedCategory: this.state.selectedCategory.state.id});
+      this.store.set('general', 0, {
+        idSelectedCategory: this.state.selectedCategory.state.id,
+        idSelectedNote: this.state.selectedCategory.state.selectedNote?.state.date || '',
+      });
     },
     onDelete: (category) => this.state.categories = this.state.categories.filter(item => item !== category),
   });
@@ -147,31 +156,30 @@ App.prototype.createNewCategory = function (date, nameCategory) {
 }
 
 App.prototype.search = function (text) {
+  console.log(this.state.selectedCategory);
   const regexp = new RegExp(`${text}`, 'gi');
-  this.elements.listNotes.innerHTML = '';
+
+  const date = Date.now();
+  const searchResult = new Category({
+    id: date,
+    title: 'Результаты поиска',
+  });
+  searchResult.htmlContainer.classList.add('checked');
+  this.elements.listCategory.innerHTML = '';
+  this.elements.listCategory.prepend(searchResult.htmlContainer);
+
   this.store.getAll('notes')
     .then(result => {
-        result.forEach(item => {
-
-          if (item.title.toLowerCase().includes(text) || item.content.toLowerCase().includes(text)) {
-            item.title = item.title.replaceAll(regexp, `<mark>${text}</mark>`);
-            item.content = item.content.replaceAll(regexp, `<mark>${text}</mark>`);
-
-            const newNote = new Note({
-              title: item.title,
-              content: item.content,
-              date: item.date,
-              onClick: (note) => {
-                newNote.init();
-              },
-              onDelete: (note) => {
-                this.state.notes = this.state.notes.filter(item => item !== note);
-              },
-            });
-
-            this.elements.listNotes.append(newNote.htmlContainer);
-          }
-        });
+      result.forEach(item => {
+        if (item.title.toLowerCase().includes(text) || item.content.toLowerCase().includes(text)) {
+          item.title = item.title.replaceAll(regexp, `<mark>${text}</mark>`);
+          item.content = item.content.replaceAll(regexp, `<mark>${text}</mark>`);
+          const foundNote = searchResult.renderNote(item.id, item.title, item.content, item.date);
+          searchResult.addNote(foundNote);
+        }
+      });
+      searchResult.htmlContainer.children[1].textContent = searchResult.state.notes.length;
+      searchResult.state.selectedNote = searchResult.state.notes[0];
+      searchResult.init();
     });
-
 }

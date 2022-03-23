@@ -1,7 +1,5 @@
-import {createElement, getDate} from './util';
+import {compare, createElement} from './util';
 import Note from './note';
-import onChange from 'on-change';
-import {compare} from './util';
 import Store from './store/store';
 
 
@@ -35,7 +33,7 @@ Category.prototype.init = function () {
   }
 }
 
-Category.prototype.getNotesInDB = function () {
+Category.prototype.getNotesInDB = function (select) {
   let previousSelectedNote = null;
 
   this.store.getAll('general').
@@ -47,13 +45,15 @@ Category.prototype.getNotesInDB = function () {
         const note = this.renderNote(this.state.id, item.title, item.content, item.date);
         this.addNote(note);
         this.htmlContainer.children[1].textContent = this.state.notes.length;
-
         if(item.date === previousSelectedNote) {
           this.state.selectedNote = note;
           this.state.selectedNote.init();
-          this.renderAllNote();
         }
       });
+
+      if(select){
+        this.renderAllNote();
+      }
     });
 }
 
