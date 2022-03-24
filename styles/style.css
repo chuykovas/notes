@@ -52,6 +52,7 @@ body, button, input {
 
 .add-category-form {
   margin-top: auto;
+  padding-top: 10px;
 }
 
 .add-category-input {
@@ -157,6 +158,8 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
   display: flex;
   align-items: center;
   margin-top: auto;
+  padding: 5px;
+  padding-top: 10px;
 }
 
 .add-new-note-text {
@@ -178,17 +181,6 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
   border-bottom: 1px solid #ccc;
 }
 
-.switch-language {
-  margin-left: auto;
-}
-
-.switch-language button {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font-weight: bold;
-}
-
 .note-content-body {
   max-height: calc(100vh - 85px);
   padding: 10px;
@@ -197,36 +189,6 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
 
 .content-for-mobile {
   display: none;
-}
-
-.kebab-menu {
-  padding-left: 0;
-  list-style: none;
-  position: absolute;
-  right: 0;
-  top: 2.5em;
-  transition: all 0.25s ease-out;
-  transform: scale(0);
-  transform-origin: 100% 0;
-  background: #ffffff;
-  border: 1px solid #ccc;
-}
-
-.kebab-menu-item {
-  width: 100%;
-  padding: 10px;
-  display: inline-block;
-  white-space: pre;
-  box-sizing: border-box;
-}
-
-.kebab-menu-item:hover {
-  background: rgba(158, 158, 158, 70%);
-}
-
-.kebab-menu.active {
-  transform: scale(1);
-  transition: all 0.25s cubic-bezier(.5, 1.8, .9, .8);
 }
 
 .upload-button-wrapper {
@@ -259,7 +221,6 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
 .italic-button::before {
   content: '\f033';
 }
-
 
 @media screen and (max-width: 768px) {
   main {

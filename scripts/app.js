@@ -43,11 +43,10 @@ App.prototype.init = function () {
       result.forEach(item => {
         const category = this.createNewCategory(item.id, item.title);
         this.state.categories.unshift(category);
+        category.getNotesInDB();
+
         if (previousSelectedCategory === item.id) {
           this.state.selectedCategory = category;
-          category.getNotesInDB('select');
-        } else {
-          category.getNotesInDB();
         }
       });
       this.fullRender();
@@ -156,14 +155,13 @@ App.prototype.createNewCategory = function (date, nameCategory) {
 }
 
 App.prototype.search = function (text) {
-  console.log(this.state.selectedCategory);
   const regexp = new RegExp(`${text}`, 'gi');
-
   const date = Date.now();
   const searchResult = new Category({
     id: date,
     title: 'Результаты поиска',
   });
+
   searchResult.htmlContainer.classList.add('checked');
   this.elements.listCategory.innerHTML = '';
   this.elements.listCategory.prepend(searchResult.htmlContainer);
@@ -174,7 +172,7 @@ App.prototype.search = function (text) {
         if (item.title.toLowerCase().includes(text) || item.content.toLowerCase().includes(text)) {
           item.title = item.title.replaceAll(regexp, `<mark>${text}</mark>`);
           item.content = item.content.replaceAll(regexp, `<mark>${text}</mark>`);
-          const foundNote = searchResult.renderNote(item.id, item.title, item.content, item.date);
+          const foundNote = searchResult.renderNote(item.idCategory, item.title, item.content, item.date);
           searchResult.addNote(foundNote);
         }
       });

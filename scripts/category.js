@@ -24,36 +24,45 @@ Category.prototype.init = function () {
     listContent: document.getElementById('contentContainer'),
   };
 
-  this.renderAllNote();
 
-  if(this.state.selectedNote){
-    this.state.selectedNote.init();
+  if (!this.state.notes.length) {
+    let previousSelectedNote = null;
+    this.store.getAll('general').then(result => previousSelectedNote = result[0].idSelectedNote);
+
+    this.store.getByIndex('notes', 'idCategory', this.state.id)
+      .then(result => {
+        this.state.notes = [];
+        result.forEach(item => {
+          const note = this.renderNote(this.state.id, item.title, item.content, item.date);
+          this.addNote(note);
+          if (item.date === previousSelectedNote) {
+            this.state.selectedNote = note;
+          }
+        });
+
+        this.renderAllNote();
+
+        if (this.state.selectedNote) {
+          this.state.selectedNote?.init();
+        } else {
+          this.elements.listContent.innerHTML = '';
+        }
+      });
   } else {
-    this.elements.listContent.innerHTML = '';
+    this.renderAllNote();
+
+    if (this.state.selectedNote) {
+      this.state.selectedNote?.init();
+    } else {
+      this.elements.listContent.innerHTML = '';
+    }
   }
 }
 
 Category.prototype.getNotesInDB = function (select) {
-  let previousSelectedNote = null;
-
-  this.store.getAll('general').
-  then(result => previousSelectedNote = result[0].idSelectedNote);
-
   this.store.getByIndex('notes', 'idCategory', this.state.id)
     .then(result => {
-      result.forEach(item => {
-        const note = this.renderNote(this.state.id, item.title, item.content, item.date);
-        this.addNote(note);
-        this.htmlContainer.children[1].textContent = this.state.notes.length;
-        if(item.date === previousSelectedNote) {
-          this.state.selectedNote = note;
-          this.state.selectedNote.init();
-        }
-      });
-
-      if(select){
-        this.renderAllNote();
-      }
+      this.htmlContainer.children[1].textContent = result.length;
     });
 }
 
@@ -112,7 +121,7 @@ Category.prototype.createNewNote = function () {
   this.htmlContainer.children[1].textContent = this.state.notes.length;
 }
 
-Category.prototype.sortNote = function (sortField){
+Category.prototype.sortNote = function (sortField) {
   if (this.state.sortedNote) {
     this.state.notes.sort(compare(sortField, 'descending'));
   } else {
@@ -129,6 +138,7 @@ Category.prototype.renderPopup = function () {
     type: 'text',
     placeholder: 'Введите название',
     autofocus: true,
+    maxLength: '50',
   });
 
   const acceptButton = createElement('button', {
@@ -177,7 +187,7 @@ Category.prototype.renderCategory = function () {
 
   const menuButton = createElement('button', {
     className: 'kebab-menu-button',
-    onclick: () => kebabMenu.classList.toggle('active')
+    onclick: () => kebabMenu.classList.toggle('active'),
   });
 
   const kebabMenuButtonEdit = createElement('li', {
@@ -186,13 +196,17 @@ Category.prototype.renderCategory = function () {
     onclick: () => {
       const popup = this.renderPopup();
       document.body.append(popup);
+      kebabMenu.classList.remove('active');
     }
   });
 
   const kebabMenuButtonDelete = createElement('li', {
     className: 'kebab-menu-item',
     textContent: 'Удалить',
-    onclick: () => this.delete()
+    onclick: () => {
+      this.delete();
+      kebabMenu.classList.remove('active');
+    }
   });
 
   const kebabMenu = createElement('ul', {
@@ -205,7 +219,8 @@ Category.prototype.renderCategory = function () {
     className: 'category',
     onclick: () => {
       this.state.onClick(this);
-    }
+    },
+    onmouseleave: () => kebabMenu.classList.remove('active'),
   });
 
   category.append(categoryTitle, noteCount, menuButton, kebabMenu);
@@ -215,17 +230,18 @@ Category.prototype.renderCategory = function () {
 
 Category.prototype.renderAllNote = function () {
   this.elements.listNote.innerHTML = '';
-  if(!this.state.notes.length){
+
+  if (!this.state.notes.length) {
     this.elements.listNote.prepend(`В категории ${this.state.title} заметок нет`);
   } else {
     const notes = this.state.notes.map(item => item.htmlContainer);
-    if(this.state.selectedNote){
+
+    if (this.state.selectedNote) {
       this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
       this.state.selectedNote.htmlContainer.classList.add('checked');
     }
     this.elements.listNote.prepend(...notes);
   }
-
 }
 
 Category.prototype.renderNote = function (id, title, content, date) {

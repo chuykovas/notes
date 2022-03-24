@@ -60,11 +60,10 @@ App.prototype.init = function () {
       result.forEach(item => {
         const category = this.createNewCategory(item.id, item.title);
         this.state.categories.unshift(category);
+        category.getNotesInDB();
+
         if (previousSelectedCategory === item.id) {
           this.state.selectedCategory = category;
-          category.getNotesInDB('select');
-        } else {
-          category.getNotesInDB();
         }
       });
       this.fullRender();
@@ -173,14 +172,13 @@ App.prototype.createNewCategory = function (date, nameCategory) {
 }
 
 App.prototype.search = function (text) {
-  console.log(this.state.selectedCategory);
   const regexp = new RegExp(`${text}`, 'gi');
-
   const date = Date.now();
   const searchResult = new _category__WEBPACK_IMPORTED_MODULE_0__["default"]({
     id: date,
     title: 'Результаты поиска',
   });
+
   searchResult.htmlContainer.classList.add('checked');
   this.elements.listCategory.innerHTML = '';
   this.elements.listCategory.prepend(searchResult.htmlContainer);
@@ -191,7 +189,7 @@ App.prototype.search = function (text) {
         if (item.title.toLowerCase().includes(text) || item.content.toLowerCase().includes(text)) {
           item.title = item.title.replaceAll(regexp, `<mark>${text}</mark>`);
           item.content = item.content.replaceAll(regexp, `<mark>${text}</mark>`);
-          const foundNote = searchResult.renderNote(item.id, item.title, item.content, item.date);
+          const foundNote = searchResult.renderNote(item.idCategory, item.title, item.content, item.date);
           searchResult.addNote(foundNote);
         }
       });
@@ -242,36 +240,45 @@ Category.prototype.init = function () {
     listContent: document.getElementById('contentContainer'),
   };
 
-  this.renderAllNote();
 
-  if(this.state.selectedNote){
-    this.state.selectedNote.init();
+  if (!this.state.notes.length) {
+    let previousSelectedNote = null;
+    this.store.getAll('general').then(result => previousSelectedNote = result[0].idSelectedNote);
+
+    this.store.getByIndex('notes', 'idCategory', this.state.id)
+      .then(result => {
+        this.state.notes = [];
+        result.forEach(item => {
+          const note = this.renderNote(this.state.id, item.title, item.content, item.date);
+          this.addNote(note);
+          if (item.date === previousSelectedNote) {
+            this.state.selectedNote = note;
+          }
+        });
+
+        this.renderAllNote();
+
+        if (this.state.selectedNote) {
+          this.state.selectedNote?.init();
+        } else {
+          this.elements.listContent.innerHTML = '';
+        }
+      });
   } else {
-    this.elements.listContent.innerHTML = '';
+    this.renderAllNote();
+
+    if (this.state.selectedNote) {
+      this.state.selectedNote?.init();
+    } else {
+      this.elements.listContent.innerHTML = '';
+    }
   }
 }
 
 Category.prototype.getNotesInDB = function (select) {
-  let previousSelectedNote = null;
-
-  this.store.getAll('general').
-  then(result => previousSelectedNote = result[0].idSelectedNote);
-
   this.store.getByIndex('notes', 'idCategory', this.state.id)
     .then(result => {
-      result.forEach(item => {
-        const note = this.renderNote(this.state.id, item.title, item.content, item.date);
-        this.addNote(note);
-        this.htmlContainer.children[1].textContent = this.state.notes.length;
-        if(item.date === previousSelectedNote) {
-          this.state.selectedNote = note;
-          this.state.selectedNote.init();
-        }
-      });
-
-      if(select){
-        this.renderAllNote();
-      }
+      this.htmlContainer.children[1].textContent = result.length;
     });
 }
 
@@ -330,7 +337,7 @@ Category.prototype.createNewNote = function () {
   this.htmlContainer.children[1].textContent = this.state.notes.length;
 }
 
-Category.prototype.sortNote = function (sortField){
+Category.prototype.sortNote = function (sortField) {
   if (this.state.sortedNote) {
     this.state.notes.sort((0,_util__WEBPACK_IMPORTED_MODULE_0__.compare)(sortField, 'descending'));
   } else {
@@ -347,6 +354,7 @@ Category.prototype.renderPopup = function () {
     type: 'text',
     placeholder: 'Введите название',
     autofocus: true,
+    maxLength: '50',
   });
 
   const acceptButton = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('button', {
@@ -395,7 +403,7 @@ Category.prototype.renderCategory = function () {
 
   const menuButton = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('button', {
     className: 'kebab-menu-button',
-    onclick: () => kebabMenu.classList.toggle('active')
+    onclick: () => kebabMenu.classList.toggle('active'),
   });
 
   const kebabMenuButtonEdit = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('li', {
@@ -404,13 +412,17 @@ Category.prototype.renderCategory = function () {
     onclick: () => {
       const popup = this.renderPopup();
       document.body.append(popup);
+      kebabMenu.classList.remove('active');
     }
   });
 
   const kebabMenuButtonDelete = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('li', {
     className: 'kebab-menu-item',
     textContent: 'Удалить',
-    onclick: () => this.delete()
+    onclick: () => {
+      this.delete();
+      kebabMenu.classList.remove('active');
+    }
   });
 
   const kebabMenu = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('ul', {
@@ -423,7 +435,8 @@ Category.prototype.renderCategory = function () {
     className: 'category',
     onclick: () => {
       this.state.onClick(this);
-    }
+    },
+    onmouseleave: () => kebabMenu.classList.remove('active'),
   });
 
   category.append(categoryTitle, noteCount, menuButton, kebabMenu);
@@ -433,17 +446,18 @@ Category.prototype.renderCategory = function () {
 
 Category.prototype.renderAllNote = function () {
   this.elements.listNote.innerHTML = '';
-  if(!this.state.notes.length){
+
+  if (!this.state.notes.length) {
     this.elements.listNote.prepend(`В категории ${this.state.title} заметок нет`);
   } else {
     const notes = this.state.notes.map(item => item.htmlContainer);
-    if(this.state.selectedNote){
+
+    if (this.state.selectedNote) {
       this.state.notes.forEach(item => item.htmlContainer.classList.remove('checked'));
       this.state.selectedNote.htmlContainer.classList.add('checked');
     }
     this.elements.listNote.prepend(...notes);
   }
-
 }
 
 Category.prototype.renderNote = function (id, title, content, date) {
