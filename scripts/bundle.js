@@ -53,22 +53,26 @@ App.prototype.init = function () {
   let previousSelectedCategory = '';
 
   this.store.getAll('general')
-    .then(result => previousSelectedCategory = result[0].idSelectedCategory);
+    .then(result => {
+      if(result.length > 0) {
+        previousSelectedCategory = result[0].idSelectedCategory;
+      }
+    });
 
   this.store.getAll('categories')
     .then(result => {
-      result.forEach(item => {
-        const category = this.createNewCategory(item.id, item.title);
-        this.state.categories.unshift(category);
-        category.getNotesInDB();
-
-        if (previousSelectedCategory === item.id) {
-          this.state.selectedCategory = category;
-        }
-      });
-      this.fullRender();
-      this.state.selectedCategory.htmlContainer.classList.add('checked');
-      this.state.selectedCategory.init();
+      if(result.length > 0) {
+        result.forEach(item => {
+          const category = this.createNewCategory(item.id, item.title);
+          this.state.categories.unshift(category);
+          category.getNotesInDB();
+          if (previousSelectedCategory === item.id) {
+            this.state.selectedCategory = category;
+          }
+        });
+        this.fullRender();
+        this.state.selectedCategory?.init();
+      }
     });
 
   this.elements.forms.createCategoryForm.addEventListener('submit', event => {
@@ -144,6 +148,7 @@ App.prototype.fullRender = function () {
   this.elements.listCategory.innerHTML = '';
   const categories = this.state.categories.map(item => item.htmlContainer);
   this.elements.listCategory.prepend(...categories);
+  this.state.selectedCategory?.htmlContainer.classList.add('checked');
 }
 
 App.prototype.renderItem = function () {
@@ -160,12 +165,27 @@ App.prototype.createNewCategory = function (date, nameCategory) {
       this.state.categories.forEach(item => item.htmlContainer.classList.remove('checked'));
       this.state.selectedCategory.htmlContainer.classList.add('checked');
       this.state.selectedCategory.init();
+
       this.store.set('general', 0, {
         idSelectedCategory: this.state.selectedCategory.state.id,
         idSelectedNote: this.state.selectedCategory.state.selectedNote?.state.date || '',
       });
     },
-    onDelete: (category) => this.state.categories = this.state.categories.filter(item => item !== category),
+    onDelete: (category) => {
+      this.state.categories = this.state.categories.filter(item => item !== category);
+      this.fullRender();
+      if(this.state.categories.length > 0) {
+        this.state.selectedCategory = this.state.categories[0];
+        this.state.selectedCategory?.init();
+        this.store.set('general', 0, {
+          idSelectedCategory: this.state.selectedCategory?.state.id || '',
+          idSelectedNote: this.state.selectedCategory.state.selectedNote?.state.date || '',
+        });
+      } else {
+        this.store.deleteItem('general', 0);
+      }
+    },
+    onUpdate: () => this.fullRender(),
   });
 
   return category;
@@ -178,6 +198,7 @@ App.prototype.search = function (text) {
     id: date,
     title: 'Результаты поиска',
   });
+  searchResult.htmlContainer.querySelector('.kebab-menu-button').remove();
 
   searchResult.htmlContainer.classList.add('checked');
   this.elements.listCategory.innerHTML = '';
@@ -190,6 +211,7 @@ App.prototype.search = function (text) {
           item.title = item.title.replaceAll(regexp, `<mark>${text}</mark>`);
           item.content = item.content.replaceAll(regexp, `<mark>${text}</mark>`);
           const foundNote = searchResult.renderNote(item.idCategory, item.title, item.content, item.date);
+          foundNote.htmlContainer.querySelector('.delete-note-button').remove();
           searchResult.addNote(foundNote);
         }
       });
@@ -228,6 +250,7 @@ function Category(params) {
     selectedNote: null,
     onClick: params.onClick,
     onDelete: params.onDelete,
+    onUpdate: params.onUpdate,
   };
 
   this.htmlContainer = this.renderCategory();
@@ -240,11 +263,13 @@ Category.prototype.init = function () {
     listContent: document.getElementById('contentContainer'),
   };
 
-
   if (!this.state.notes.length) {
     let previousSelectedNote = null;
-    this.store.getAll('general').then(result => previousSelectedNote = result[0].idSelectedNote);
-
+    this.store.getAll('general').then(result => {
+      if (result.length > 0) {
+        previousSelectedNote = result[0].idSelectedNote;
+      }
+    });
     this.store.getByIndex('notes', 'idCategory', this.state.id)
       .then(result => {
         this.state.notes = [];
@@ -278,14 +303,19 @@ Category.prototype.init = function () {
 Category.prototype.getNotesInDB = function (select) {
   this.store.getByIndex('notes', 'idCategory', this.state.id)
     .then(result => {
-      this.htmlContainer.children[1].textContent = result.length;
+      result.forEach(item => {
+        const note = this.renderNote(item.idCategory, item.title, item.content, item.date);
+        this.addNote(note);
+      });
+      this.htmlContainer = this.renderCategory();
+      this.state.onUpdate();
     });
 }
 
 Category.prototype.delete = function () {
   //удаление со страницы
-  this.state.notes = [];
-  this.htmlContainer.remove();
+  this.elements.listNote.innerHTML = '';
+  this.elements.listContent.innerHTML = '';
   //удаление из хранилища
   this.store.deleteItem('categories', this.state.id);
   this.store.deleteNotes('notes', 'idCategory', this.state.id);
@@ -300,10 +330,12 @@ Category.prototype.delete = function () {
 Category.prototype.rename = function (newName) {
   this.state.title = newName;
   //меняем название категории
-  this.htmlContainer.firstChild.textContent = this.state.title;
+  this.htmlContainer = this.renderCategory();
+  this.state.onUpdate();
+
   this.store.set('categories', this.state.id, {
     id: this.state.id,
-    title: newName,
+    title: this.state.title,
   });
 }
 
@@ -334,7 +366,8 @@ Category.prototype.createNewNote = function () {
     content: newNote.state.content,
   });
   //меняем количество заметок в категории
-  this.htmlContainer.children[1].textContent = this.state.notes.length;
+  this.htmlContainer = this.renderCategory();
+  this.state.onUpdate();
 }
 
 Category.prototype.sortNote = function (sortField) {
@@ -343,8 +376,8 @@ Category.prototype.sortNote = function (sortField) {
   } else {
     this.state.notes.sort((0,_util__WEBPACK_IMPORTED_MODULE_0__.compare)(sortField));
   }
-  this.state.sortedNote = !this.state.sortedNote;
 
+  this.state.sortedNote = !this.state.sortedNote;
   this.renderAllNote();
 }
 
@@ -403,13 +436,17 @@ Category.prototype.renderCategory = function () {
 
   const menuButton = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('button', {
     className: 'kebab-menu-button',
-    onclick: () => kebabMenu.classList.toggle('active'),
+    onclick: (event) => {
+      event.stopPropagation();
+      kebabMenu.classList.toggle('active');
+    },
   });
 
   const kebabMenuButtonEdit = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('li', {
     className: 'kebab-menu-item',
     textContent: 'Редактировать',
-    onclick: () => {
+    onclick: event => {
+      event.stopPropagation();
       const popup = this.renderPopup();
       document.body.append(popup);
       kebabMenu.classList.remove('active');
@@ -419,9 +456,9 @@ Category.prototype.renderCategory = function () {
   const kebabMenuButtonDelete = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('li', {
     className: 'kebab-menu-item',
     textContent: 'Удалить',
-    onclick: () => {
+    onclick: (event) => {
+      event.stopPropagation();
       this.delete();
-      kebabMenu.classList.remove('active');
     }
   });
 
@@ -479,7 +516,8 @@ Category.prototype.renderNote = function (id, title, content, date) {
     },
     onDelete: (note) => {
       this.state.notes = this.state.notes.filter(item => item !== note);
-      this.htmlContainer.children[1].textContent = this.state.notes.length;
+      this.htmlContainer = this.renderCategory();
+      this.state.onUpdate();
     },
     onUpdate: () => this.renderAllNote(),
   });
@@ -816,6 +854,7 @@ IndexedDB.prototype.deleteEntry = function (storeName, id) {
     };
 
     transaction.onerror = () => {
+      console.log('чет видимо не так пошло в deleteentry');
       reject(transaction.error);
     };
   });
@@ -850,6 +889,7 @@ IndexedDB.prototype.deleteMultipleEntries = function (storeName, nameIndex, inde
     };
 
     transaction.onerror = () => {
+      console.log('чет видимо не так пошло в deleteentry');
       reject(transaction.error);
     };
   })

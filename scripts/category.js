@@ -12,6 +12,7 @@ function Category(params) {
     selectedNote: null,
     onClick: params.onClick,
     onDelete: params.onDelete,
+    onUpdate: params.onUpdate,
   };
 
   this.htmlContainer = this.renderCategory();
@@ -24,11 +25,13 @@ Category.prototype.init = function () {
     listContent: document.getElementById('contentContainer'),
   };
 
-
   if (!this.state.notes.length) {
     let previousSelectedNote = null;
-    this.store.getAll('general').then(result => previousSelectedNote = result[0].idSelectedNote);
-
+    this.store.getAll('general').then(result => {
+      if (result.length > 0) {
+        previousSelectedNote = result[0].idSelectedNote;
+      }
+    });
     this.store.getByIndex('notes', 'idCategory', this.state.id)
       .then(result => {
         this.state.notes = [];
@@ -62,14 +65,19 @@ Category.prototype.init = function () {
 Category.prototype.getNotesInDB = function (select) {
   this.store.getByIndex('notes', 'idCategory', this.state.id)
     .then(result => {
-      this.htmlContainer.children[1].textContent = result.length;
+      result.forEach(item => {
+        const note = this.renderNote(item.idCategory, item.title, item.content, item.date);
+        this.addNote(note);
+      });
+      this.htmlContainer = this.renderCategory();
+      this.state.onUpdate();
     });
 }
 
 Category.prototype.delete = function () {
   //удаление со страницы
-  this.state.notes = [];
-  this.htmlContainer.remove();
+  this.elements.listNote.innerHTML = '';
+  this.elements.listContent.innerHTML = '';
   //удаление из хранилища
   this.store.deleteItem('categories', this.state.id);
   this.store.deleteNotes('notes', 'idCategory', this.state.id);
@@ -84,10 +92,12 @@ Category.prototype.delete = function () {
 Category.prototype.rename = function (newName) {
   this.state.title = newName;
   //меняем название категории
-  this.htmlContainer.firstChild.textContent = this.state.title;
+  this.htmlContainer = this.renderCategory();
+  this.state.onUpdate();
+
   this.store.set('categories', this.state.id, {
     id: this.state.id,
-    title: newName,
+    title: this.state.title,
   });
 }
 
@@ -118,7 +128,8 @@ Category.prototype.createNewNote = function () {
     content: newNote.state.content,
   });
   //меняем количество заметок в категории
-  this.htmlContainer.children[1].textContent = this.state.notes.length;
+  this.htmlContainer = this.renderCategory();
+  this.state.onUpdate();
 }
 
 Category.prototype.sortNote = function (sortField) {
@@ -127,8 +138,8 @@ Category.prototype.sortNote = function (sortField) {
   } else {
     this.state.notes.sort(compare(sortField));
   }
-  this.state.sortedNote = !this.state.sortedNote;
 
+  this.state.sortedNote = !this.state.sortedNote;
   this.renderAllNote();
 }
 
@@ -187,13 +198,17 @@ Category.prototype.renderCategory = function () {
 
   const menuButton = createElement('button', {
     className: 'kebab-menu-button',
-    onclick: () => kebabMenu.classList.toggle('active'),
+    onclick: (event) => {
+      event.stopPropagation();
+      kebabMenu.classList.toggle('active');
+    },
   });
 
   const kebabMenuButtonEdit = createElement('li', {
     className: 'kebab-menu-item',
     textContent: 'Редактировать',
-    onclick: () => {
+    onclick: event => {
+      event.stopPropagation();
       const popup = this.renderPopup();
       document.body.append(popup);
       kebabMenu.classList.remove('active');
@@ -203,9 +218,9 @@ Category.prototype.renderCategory = function () {
   const kebabMenuButtonDelete = createElement('li', {
     className: 'kebab-menu-item',
     textContent: 'Удалить',
-    onclick: () => {
+    onclick: (event) => {
+      event.stopPropagation();
       this.delete();
-      kebabMenu.classList.remove('active');
     }
   });
 
@@ -263,7 +278,8 @@ Category.prototype.renderNote = function (id, title, content, date) {
     },
     onDelete: (note) => {
       this.state.notes = this.state.notes.filter(item => item !== note);
-      this.htmlContainer.children[1].textContent = this.state.notes.length;
+      this.htmlContainer = this.renderCategory();
+      this.state.onUpdate();
     },
     onUpdate: () => this.renderAllNote(),
   });

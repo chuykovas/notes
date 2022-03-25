@@ -164,6 +164,7 @@ IndexedDB.prototype.deleteEntry = function (storeName, id) {
     };
 
     transaction.onerror = () => {
+      console.log('чет видимо не так пошло в deleteentry');
       reject(transaction.error);
     };
   });
@@ -198,6 +199,7 @@ IndexedDB.prototype.deleteMultipleEntries = function (storeName, nameIndex, inde
     };
 
     transaction.onerror = () => {
+      console.log('чет видимо не так пошло в deleteentry');
       reject(transaction.error);
     };
   })

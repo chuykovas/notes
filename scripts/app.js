@@ -36,22 +36,26 @@ App.prototype.init = function () {
   let previousSelectedCategory = '';
 
   this.store.getAll('general')
-    .then(result => previousSelectedCategory = result[0].idSelectedCategory);
+    .then(result => {
+      if(result.length > 0) {
+        previousSelectedCategory = result[0].idSelectedCategory;
+      }
+    });
 
   this.store.getAll('categories')
     .then(result => {
-      result.forEach(item => {
-        const category = this.createNewCategory(item.id, item.title);
-        this.state.categories.unshift(category);
-        category.getNotesInDB();
-
-        if (previousSelectedCategory === item.id) {
-          this.state.selectedCategory = category;
-        }
-      });
-      this.fullRender();
-      this.state.selectedCategory.htmlContainer.classList.add('checked');
-      this.state.selectedCategory.init();
+      if(result.length > 0) {
+        result.forEach(item => {
+          const category = this.createNewCategory(item.id, item.title);
+          this.state.categories.unshift(category);
+          category.getNotesInDB();
+          if (previousSelectedCategory === item.id) {
+            this.state.selectedCategory = category;
+          }
+        });
+        this.fullRender();
+        this.state.selectedCategory?.init();
+      }
     });
 
   this.elements.forms.createCategoryForm.addEventListener('submit', event => {
@@ -127,6 +131,7 @@ App.prototype.fullRender = function () {
   this.elements.listCategory.innerHTML = '';
   const categories = this.state.categories.map(item => item.htmlContainer);
   this.elements.listCategory.prepend(...categories);
+  this.state.selectedCategory?.htmlContainer.classList.add('checked');
 }
 
 App.prototype.renderItem = function () {
@@ -143,12 +148,27 @@ App.prototype.createNewCategory = function (date, nameCategory) {
       this.state.categories.forEach(item => item.htmlContainer.classList.remove('checked'));
       this.state.selectedCategory.htmlContainer.classList.add('checked');
       this.state.selectedCategory.init();
+
       this.store.set('general', 0, {
         idSelectedCategory: this.state.selectedCategory.state.id,
         idSelectedNote: this.state.selectedCategory.state.selectedNote?.state.date || '',
       });
     },
-    onDelete: (category) => this.state.categories = this.state.categories.filter(item => item !== category),
+    onDelete: (category) => {
+      this.state.categories = this.state.categories.filter(item => item !== category);
+      this.fullRender();
+      if(this.state.categories.length > 0) {
+        this.state.selectedCategory = this.state.categories[0];
+        this.state.selectedCategory?.init();
+        this.store.set('general', 0, {
+          idSelectedCategory: this.state.selectedCategory?.state.id || '',
+          idSelectedNote: this.state.selectedCategory.state.selectedNote?.state.date || '',
+        });
+      } else {
+        this.store.deleteItem('general', 0);
+      }
+    },
+    onUpdate: () => this.fullRender(),
   });
 
   return category;
@@ -161,6 +181,7 @@ App.prototype.search = function (text) {
     id: date,
     title: 'Результаты поиска',
   });
+  searchResult.htmlContainer.querySelector('.kebab-menu-button').remove();
 
   searchResult.htmlContainer.classList.add('checked');
   this.elements.listCategory.innerHTML = '';
@@ -173,6 +194,7 @@ App.prototype.search = function (text) {
           item.title = item.title.replaceAll(regexp, `<mark>${text}</mark>`);
           item.content = item.content.replaceAll(regexp, `<mark>${text}</mark>`);
           const foundNote = searchResult.renderNote(item.idCategory, item.title, item.content, item.date);
+          foundNote.htmlContainer.querySelector('.delete-note-button').remove();
           searchResult.addNote(foundNote);
         }
       });
