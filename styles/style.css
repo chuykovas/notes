@@ -35,6 +35,7 @@ body, button, input {
   font-size: 20px;
   font-family: "Font Awesome 5 Free";
   font-weight: bold;
+  opacity: 0.9;
 }
 
 .category-list {
@@ -196,7 +197,7 @@ input[type="search"]::-webkit-search-results-decoration { display: none; }
   background-image: url('../assets/paperclip-solid.svg');
   background-repeat: no-repeat;
   background-size: contain;
-  opacity: 0.7;
+  opacity: 0.6;
   width: 24px;
   height: 24px;
   overflow: hidden;
