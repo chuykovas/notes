@@ -21,7 +21,7 @@ export function createElement(tag, attributes) {
   return element;
 }
 
-export function getDate(date) {
+export function formatDate(date) {
   const dateNow = new Date(date);
 
   return `${dateNow.toLocaleDateString()} ${dateNow.toLocaleTimeString()}`;
@@ -33,7 +33,7 @@ export function getDate(date) {
  * @returns {*}
  */
 
-export function getBase64(file, callback) {
+export function convertToBase64(file, callback) {
 
   const reader = new FileReader();
 
@@ -48,7 +48,7 @@ export function getBase64(file, callback) {
  * @param order
  * @returns {function(*, *): number|number}
  */
-export function compare(key, order = 'ascending') {
+export function compare(key, order = 'asc') {
   return function (a, b) {
     const firstName = a.state[key];
     const secondName = b.state[key];
@@ -66,6 +66,6 @@ export function compare(key, order = 'ascending') {
       comparison = -1;
     }
 
-    return order === 'descending' ? comparison * -1 : comparison;
+    return order === 'desc' ? comparison * -1 : comparison;
   }
 }

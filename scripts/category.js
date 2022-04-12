@@ -62,13 +62,14 @@ Category.prototype.init = function () {
   }
 }
 
-Category.prototype.getNotesInDB = function (select) {
+Category.prototype.getNotesFromDB = function (select) {
   this.store.getByIndex('notes', 'idCategory', this.state.id)
     .then(result => {
       result.forEach(item => {
         const note = this.renderNote(item.idCategory, item.title, item.content, item.date);
         this.addNote(note);
       });
+
       this.htmlContainer = this.renderCategory();
       this.state.onUpdate();
     });
@@ -105,36 +106,9 @@ Category.prototype.addNote = function (note) {
   this.state.notes.unshift(note);
 }
 
-Category.prototype.createNewNote = function () {
-  const date = Date.now();
-  const newNote = this.renderNote(this.state.id, null, null, date);
-
-  this.addNote(newNote);
-
-  this.state.selectedNote = newNote;
-  this.state.selectedNote.init();
-
-  this.store.set('general', 0, {
-    idSelectedCategory: this.state.id,
-    idSelectedNote: this.state.selectedNote.state.date,
-  });
-
-  this.renderAllNote();
-
-  this.store.set('notes', date, {
-    idCategory: this.state.id,
-    date: newNote.state.date,
-    title: newNote.state.title,
-    content: newNote.state.content,
-  });
-  //меняем количество заметок в категории
-  this.htmlContainer = this.renderCategory();
-  this.state.onUpdate();
-}
-
 Category.prototype.sortNote = function (sortField) {
   if (this.state.sortedNote) {
-    this.state.notes.sort(compare(sortField, 'descending'));
+    this.state.notes.sort(compare(sortField, 'desc'));
   } else {
     this.state.notes.sort(compare(sortField));
   }
@@ -259,12 +233,12 @@ Category.prototype.renderAllNote = function () {
   }
 }
 
-Category.prototype.renderNote = function (id, title, content, date) {
+Category.prototype.renderNote = function (id, title='', content='', date) {
   const newNote = new Note({
     idCategory: id,
-    title: title || '',
-    content: content || '',
-    date: date,
+    title,
+    content,
+    date,
     onClick: (note) => {
       this.state.selectedNote = note;
       this.state.selectedNote.init();

@@ -54,24 +54,27 @@ App.prototype.init = function () {
 
   this.store.getAll('general')
     .then(result => {
-      if(result.length > 0) {
+      if (result.length > 0) {
         previousSelectedCategory = result[0].idSelectedCategory;
       }
     });
 
   this.store.getAll('categories')
-    .then(result => {
-      if(result.length > 0) {
-        result.forEach(item => {
+    .then(data => {
+      if (!!data.length) {
+        data.forEach(item => {
           const category = this.createNewCategory(item.id, item.title);
           this.state.categories.unshift(category);
-          category.getNotesInDB();
+          category.getNotesFromDB();
           if (previousSelectedCategory === item.id) {
             this.state.selectedCategory = category;
           }
         });
         this.fullRender();
-        this.state.selectedCategory?.init();
+
+        if (this.state.selectedCategory) {
+          this.state.selectedCategory.init();
+        }
       }
     });
 
@@ -100,7 +103,7 @@ App.prototype.init = function () {
 
   this.elements.buttons.sortCategory.addEventListener('click', () => {
     if (this.state.sortedCategory) {
-      this.state.categories.sort((0,_util__WEBPACK_IMPORTED_MODULE_1__.compare)('title', 'descending'));
+      this.state.categories.sort((0,_util__WEBPACK_IMPORTED_MODULE_1__.compare)('title', 'desc'));
     } else {
       this.state.categories.sort((0,_util__WEBPACK_IMPORTED_MODULE_1__.compare)('title'));
     }
@@ -113,7 +116,7 @@ App.prototype.init = function () {
 
   this.elements.buttons.addImageToNote.addEventListener('change', (event) => {
     const data = null;
-    (0,_util__WEBPACK_IMPORTED_MODULE_1__.getBase64)(event.target.files[0], (base64Data) => {
+    (0,_util__WEBPACK_IMPORTED_MODULE_1__.convertToBase64)(event.target.files[0], (base64Data) => {
       this.state.selectedCategory.state.selectedNote.addImage(base64Data);
     });
   });
@@ -147,8 +150,10 @@ App.prototype.init = function () {
 App.prototype.fullRender = function () {
   this.elements.listCategory.innerHTML = '';
   const categories = this.state.categories.map(item => item.htmlContainer);
-  this.elements.listCategory.prepend(...categories);
-  this.state.selectedCategory?.htmlContainer.classList.add('checked');
+  this.elements.listCategory.append(...categories);
+  if (this.state.selectedCategory) {
+    this.state.selectedCategory.htmlContainer.classList.add('checked');
+  }
 }
 
 App.prototype.renderItem = function () {
@@ -174,7 +179,8 @@ App.prototype.createNewCategory = function (date, nameCategory) {
     onDelete: (category) => {
       this.state.categories = this.state.categories.filter(item => item !== category);
       this.fullRender();
-      if(this.state.categories.length > 0) {
+
+      if (this.state.categories.length > 0) {
         this.state.selectedCategory = this.state.categories[0];
         this.state.selectedCategory?.init();
         this.store.set('general', 0, {
@@ -199,7 +205,6 @@ App.prototype.search = function (text) {
     title: 'Результаты поиска',
   });
   searchResult.htmlContainer.querySelector('.kebab-menu-button').remove();
-
   searchResult.htmlContainer.classList.add('checked');
   this.elements.listCategory.innerHTML = '';
   this.elements.listCategory.prepend(searchResult.htmlContainer);
@@ -207,7 +212,10 @@ App.prototype.search = function (text) {
   this.store.getAll('notes')
     .then(result => {
       result.forEach(item => {
-        if (item.title.toLowerCase().includes(text) || item.content.toLowerCase().includes(text)) {
+        const titleIncludesText = item.title.toLowerCase().includes(text);
+        const contentIncludesText = item.content.toLowerCase().includes(text);
+
+        if (titleIncludesText || contentIncludesText) {
           item.title = item.title.replaceAll(regexp, `<mark>${text}</mark>`);
           item.content = item.content.replaceAll(regexp, `<mark>${text}</mark>`);
           const foundNote = searchResult.renderNote(item.idCategory, item.title, item.content, item.date);
@@ -300,13 +308,14 @@ Category.prototype.init = function () {
   }
 }
 
-Category.prototype.getNotesInDB = function (select) {
+Category.prototype.getNotesFromDB = function (select) {
   this.store.getByIndex('notes', 'idCategory', this.state.id)
     .then(result => {
       result.forEach(item => {
         const note = this.renderNote(item.idCategory, item.title, item.content, item.date);
         this.addNote(note);
       });
+
       this.htmlContainer = this.renderCategory();
       this.state.onUpdate();
     });
@@ -343,36 +352,9 @@ Category.prototype.addNote = function (note) {
   this.state.notes.unshift(note);
 }
 
-Category.prototype.createNewNote = function () {
-  const date = Date.now();
-  const newNote = this.renderNote(this.state.id, null, null, date);
-
-  this.addNote(newNote);
-
-  this.state.selectedNote = newNote;
-  this.state.selectedNote.init();
-
-  this.store.set('general', 0, {
-    idSelectedCategory: this.state.id,
-    idSelectedNote: this.state.selectedNote.state.date,
-  });
-
-  this.renderAllNote();
-
-  this.store.set('notes', date, {
-    idCategory: this.state.id,
-    date: newNote.state.date,
-    title: newNote.state.title,
-    content: newNote.state.content,
-  });
-  //меняем количество заметок в категории
-  this.htmlContainer = this.renderCategory();
-  this.state.onUpdate();
-}
-
 Category.prototype.sortNote = function (sortField) {
   if (this.state.sortedNote) {
-    this.state.notes.sort((0,_util__WEBPACK_IMPORTED_MODULE_0__.compare)(sortField, 'descending'));
+    this.state.notes.sort((0,_util__WEBPACK_IMPORTED_MODULE_0__.compare)(sortField, 'desc'));
   } else {
     this.state.notes.sort((0,_util__WEBPACK_IMPORTED_MODULE_0__.compare)(sortField));
   }
@@ -497,12 +479,12 @@ Category.prototype.renderAllNote = function () {
   }
 }
 
-Category.prototype.renderNote = function (id, title, content, date) {
+Category.prototype.renderNote = function (id, title='', content='', date) {
   const newNote = new _note__WEBPACK_IMPORTED_MODULE_1__["default"]({
     idCategory: id,
-    title: title || '',
-    content: content || '',
-    date: date,
+    title,
+    content,
+    date,
     onClick: (note) => {
       this.state.selectedNote = note;
       this.state.selectedNote.init();
@@ -597,7 +579,7 @@ Note.prototype.render = function () {
 
   const dateNote = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('span', {
     className: 'note-date',
-    textContent: `${(0,_util__WEBPACK_IMPORTED_MODULE_0__.getDate)(this.state.date)}`
+    textContent: `${(0,_util__WEBPACK_IMPORTED_MODULE_0__.formatDate)(this.state.date)}`
   });
 
   const shortDescription = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('p', {
@@ -628,7 +610,7 @@ Note.prototype.render = function () {
 Note.prototype.renderNoteContent = function () {
   const noteDate = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
     className: 'note-content-date',
-    textContent: `${(0,_util__WEBPACK_IMPORTED_MODULE_0__.getDate)(this.state.date)}`
+    textContent: `${(0,_util__WEBPACK_IMPORTED_MODULE_0__.formatDate)(this.state.date)}`
   });
 
   const noteTitleInput = (0,_util__WEBPACK_IMPORTED_MODULE_0__.createElement)('div', {
@@ -978,8 +960,8 @@ Store.prototype.deleteNotes = async function (storeName, index, id) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "createElement": () => (/* binding */ createElement),
-/* harmony export */   "getDate": () => (/* binding */ getDate),
-/* harmony export */   "getBase64": () => (/* binding */ getBase64),
+/* harmony export */   "formatDate": () => (/* binding */ formatDate),
+/* harmony export */   "convertToBase64": () => (/* binding */ convertToBase64),
 /* harmony export */   "compare": () => (/* binding */ compare)
 /* harmony export */ });
 /**
@@ -1005,7 +987,7 @@ function createElement(tag, attributes) {
   return element;
 }
 
-function getDate(date) {
+function formatDate(date) {
   const dateNow = new Date(date);
 
   return `${dateNow.toLocaleDateString()} ${dateNow.toLocaleTimeString()}`;
@@ -1017,7 +999,7 @@ function getDate(date) {
  * @returns {*}
  */
 
-function getBase64(file, callback) {
+function convertToBase64(file, callback) {
 
   const reader = new FileReader();
 
@@ -1032,7 +1014,7 @@ function getBase64(file, callback) {
  * @param order
  * @returns {function(*, *): number|number}
  */
-function compare(key, order = 'ascending') {
+function compare(key, order = 'asc') {
   return function (a, b) {
     const firstName = a.state[key];
     const secondName = b.state[key];
@@ -1050,7 +1032,7 @@ function compare(key, order = 'ascending') {
       comparison = -1;
     }
 
-    return order === 'descending' ? comparison * -1 : comparison;
+    return order === 'desc' ? comparison * -1 : comparison;
   }
 }
 

@@ -1,5 +1,5 @@
 import Category from './category';
-import {compare, getBase64} from './util';
+import {compare, convertToBase64} from './util';
 import Store from './store/store';
 
 export default function App() {
@@ -37,24 +37,27 @@ App.prototype.init = function () {
 
   this.store.getAll('general')
     .then(result => {
-      if(result.length > 0) {
+      if (result.length > 0) {
         previousSelectedCategory = result[0].idSelectedCategory;
       }
     });
 
   this.store.getAll('categories')
-    .then(result => {
-      if(result.length > 0) {
-        result.forEach(item => {
+    .then(data => {
+      if (!!data.length) {
+        data.forEach(item => {
           const category = this.createNewCategory(item.id, item.title);
           this.state.categories.unshift(category);
-          category.getNotesInDB();
+          category.getNotesFromDB();
           if (previousSelectedCategory === item.id) {
             this.state.selectedCategory = category;
           }
         });
         this.fullRender();
-        this.state.selectedCategory?.init();
+
+        if (this.state.selectedCategory) {
+          this.state.selectedCategory.init();
+        }
       }
     });
 
@@ -83,7 +86,7 @@ App.prototype.init = function () {
 
   this.elements.buttons.sortCategory.addEventListener('click', () => {
     if (this.state.sortedCategory) {
-      this.state.categories.sort(compare('title', 'descending'));
+      this.state.categories.sort(compare('title', 'desc'));
     } else {
       this.state.categories.sort(compare('title'));
     }
@@ -96,7 +99,7 @@ App.prototype.init = function () {
 
   this.elements.buttons.addImageToNote.addEventListener('change', (event) => {
     const data = null;
-    getBase64(event.target.files[0], (base64Data) => {
+    convertToBase64(event.target.files[0], (base64Data) => {
       this.state.selectedCategory.state.selectedNote.addImage(base64Data);
     });
   });
@@ -130,8 +133,10 @@ App.prototype.init = function () {
 App.prototype.fullRender = function () {
   this.elements.listCategory.innerHTML = '';
   const categories = this.state.categories.map(item => item.htmlContainer);
-  this.elements.listCategory.prepend(...categories);
-  this.state.selectedCategory?.htmlContainer.classList.add('checked');
+  this.elements.listCategory.append(...categories);
+  if (this.state.selectedCategory) {
+    this.state.selectedCategory.htmlContainer.classList.add('checked');
+  }
 }
 
 App.prototype.renderItem = function () {
@@ -157,7 +162,8 @@ App.prototype.createNewCategory = function (date, nameCategory) {
     onDelete: (category) => {
       this.state.categories = this.state.categories.filter(item => item !== category);
       this.fullRender();
-      if(this.state.categories.length > 0) {
+
+      if (this.state.categories.length > 0) {
         this.state.selectedCategory = this.state.categories[0];
         this.state.selectedCategory?.init();
         this.store.set('general', 0, {
@@ -182,7 +188,6 @@ App.prototype.search = function (text) {
     title: 'Результаты поиска',
   });
   searchResult.htmlContainer.querySelector('.kebab-menu-button').remove();
-
   searchResult.htmlContainer.classList.add('checked');
   this.elements.listCategory.innerHTML = '';
   this.elements.listCategory.prepend(searchResult.htmlContainer);
@@ -190,7 +195,10 @@ App.prototype.search = function (text) {
   this.store.getAll('notes')
     .then(result => {
       result.forEach(item => {
-        if (item.title.toLowerCase().includes(text) || item.content.toLowerCase().includes(text)) {
+        const titleIncludesText = item.title.toLowerCase().includes(text);
+        const contentIncludesText = item.content.toLowerCase().includes(text);
+
+        if (titleIncludesText || contentIncludesText) {
           item.title = item.title.replaceAll(regexp, `<mark>${text}</mark>`);
           item.content = item.content.replaceAll(regexp, `<mark>${text}</mark>`);
           const foundNote = searchResult.renderNote(item.idCategory, item.title, item.content, item.date);

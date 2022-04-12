@@ -1,4 +1,4 @@
-import {createElement, getDate} from './util';
+import {createElement, formatDate} from './util';
 import Category from './category';
 import Store from './store/store';
 
@@ -52,7 +52,7 @@ Note.prototype.render = function () {
 
   const dateNote = createElement('span', {
     className: 'note-date',
-    textContent: `${getDate(this.state.date)}`
+    textContent: `${formatDate(this.state.date)}`
   });
 
   const shortDescription = createElement('p', {
@@ -83,7 +83,7 @@ Note.prototype.render = function () {
 Note.prototype.renderNoteContent = function () {
   const noteDate = createElement('div', {
     className: 'note-content-date',
-    textContent: `${getDate(this.state.date)}`
+    textContent: `${formatDate(this.state.date)}`
   });
 
   const noteTitleInput = createElement('div', {
