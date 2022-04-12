@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="8f4e2fd6-076a-4d56-9831-67960644c92a" name="Changes" comment="final v1.0: fix bags">
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/app.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/bundle.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/bundle.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/bundle.js.map" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/bundle.js.map" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/category.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/category.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/note.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/note.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scripts/util.js" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/util.js" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="4-edit-note" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/scripts/util.js" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/scripts/note.js" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/scripts/store/store.js" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/scripts/category.js" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/scripts/store/indexedDB.js" root0="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/scripts/app.js" root0="SKIP_INSPECTION" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="24aopFhXotkLzx6SQmX39EJO7x4" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File" value="JavaScript" />
+    <property name="last_opened_file_path" value="$USER_HOME$/Verme/wfmportal" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.standard" value="true" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.standard" value="" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="settings.editor.selected.configurable" value="settings.javascript.linters.eslint" />
+    <property name="ts.external.directory.path" value="$APPLICATION_HOME_DIR$/plugins/JavaScriptLanguage/jsLanguageServicesImpl/external" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="RunManager" selected="Node.js.script.js">
+    <configuration name="category.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/scripts/category.js" working-dir="$PROJECT_DIR$/scripts">
+      <method v="2" />
+    </configuration>
+    <configuration name="script.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/script.js" working-dir="$PROJECT_DIR$">
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Node.js.script.js" />
+        <item itemvalue="Node.js.category.js" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8f4e2fd6-076a-4d56-9831-67960644c92a" name="Changes" comment="" />
+      <created>1643878241528</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1643878241528</updated>
+      <workItem from="1643878242728" duration="5811000" />
+      <workItem from="1644234137444" duration="3952000" />
+      <workItem from="1644395750979" duration="3000" />
+      <workItem from="1644395929729" duration="14000" />
+      <workItem from="1644408791054" duration="7000" />
+      <workItem from="1644409315410" duration="17982000" />
+      <workItem from="1644477080579" duration="17157000" />
+      <workItem from="1644564391575" duration="22829000" />
+      <workItem from="1644622913026" duration="6000" />
+      <workItem from="1644822702187" duration="15831000" />
+      <workItem from="1644850986379" duration="1223000" />
+      <workItem from="1644852222060" duration="2476000" />
+      <workItem from="1644910605082" duration="10783000" />
+      <workItem from="1644931878733" duration="3598000" />
+      <workItem from="1644937814714" duration="1894000" />
+      <workItem from="1644996870034" duration="14288000" />
+      <workItem from="1645083529955" duration="6790000" />
+      <workItem from="1645106224696" duration="94000" />
+      <workItem from="1645106505011" duration="30000" />
+      <workItem from="1645108595219" duration="1544000" />
+      <workItem from="1645168351567" duration="24382000" />
+      <workItem from="1645203515533" duration="338000" />
+      <workItem from="1645205552805" duration="4000" />
+      <workItem from="1645265164053" duration="1207000" />
+      <workItem from="1645428795776" duration="20262000" />
+      <workItem from="1645513695200" duration="10814000" />
+      <workItem from="1645534353892" duration="8159000" />
+      <workItem from="1645690081107" duration="8437000" />
+      <workItem from="1645705720117" duration="7234000" />
+      <workItem from="1645775522624" duration="9000" />
+      <workItem from="1645775643091" duration="175000" />
+      <workItem from="1646032049874" duration="18224000" />
+      <workItem from="1646119501393" duration="5404000" />
+      <workItem from="1646292722868" duration="20220000" />
+      <workItem from="1646379099482" duration="5488000" />
+      <workItem from="1646398118666" duration="10251000" />
+      <workItem from="1646411713008" duration="15000" />
+      <workItem from="1646412308314" duration="923000" />
+      <workItem from="1646463289061" duration="18809000" />
+      <workItem from="1646809267177" duration="9287000" />
+      <workItem from="1646833690722" duration="5502000" />
+      <workItem from="1646895921977" duration="1024000" />
+      <workItem from="1646899456642" duration="19496000" />
+      <workItem from="1646982123574" duration="23112000" />
+      <workItem from="1647241356028" duration="9804000" />
+      <workItem from="1647268142211" duration="3589000" />
+      <workItem from="1647283249404" duration="464000" />
+      <workItem from="1647284072433" duration="52000" />
+      <workItem from="1647328606464" duration="18306000" />
+      <workItem from="1647416481916" duration="5213000" />
+      <workItem from="1647517843707" duration="4418000" />
+      <workItem from="1647588972963" duration="3087000" />
+      <workItem from="1647846366557" duration="8561000" />
+      <workItem from="1647876069558" duration="8000" />
+      <workItem from="1647934137594" duration="14243000" />
+      <workItem from="1648020765589" duration="5679000" />
+      <workItem from="1648027035121" duration="8693000" />
+      <workItem from="1648047274610" duration="299000" />
+      <workItem from="1648104379889" duration="959000" />
+      <workItem from="1648106516851" duration="9999000" />
+      <workItem from="1648127528466" duration="6385000" />
+      <workItem from="1648192687980" duration="10169000" />
+      <workItem from="1648220647355" duration="577000" />
+      <workItem from="1648221243603" duration="1382000" />
+      <workItem from="1648459296210" duration="357000" />
+      <workItem from="1648459681228" duration="16000" />
+      <workItem from="1648461774504" duration="1451000" />
+    </task>
+    <task id="LOCAL-00001" summary="add .gitignore">
+      <created>1644428378845</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1644428378845</updated>
+    </task>
+    <task id="LOCAL-00002" summary="create categories field">
+      <created>1644483147891</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1644483147891</updated>
+    </task>
+    <task id="LOCAL-00003" summary="fix basis layout">
+      <created>1644493583111</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1644493583111</updated>
+    </task>
+    <task id="LOCAL-00004" summary="add webpack&#10;fix add category">
+      <created>1644586173320</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1644586173320</updated>
+    </task>
+    <task id="LOCAL-00005" summary="add webpack&#10;fix add category">
+      <created>1644586185722</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1644586185722</updated>
+    </task>
+    <task id="LOCAL-00006" summary="MVC pattern">
+      <created>1644926205208</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1644926205208</updated>
+    </task>
+    <task id="LOCAL-00007" summary="add, edit, delete category">
+      <created>1645106161558</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1645106161558</updated>
+    </task>
+    <task id="LOCAL-00008" summary="add note">
+      <created>1645513957227</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1645513957227</updated>
+    </task>
+    <task id="LOCAL-00009" summary="fix small bugs">
+      <created>1645532544114</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1645532544114</updated>
+    </task>
+    <task id="LOCAL-00010" summary="add translation, create Category, note">
+      <created>1645775686668</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1645775686668</updated>
+    </task>
+    <task id="LOCAL-00011" summary="add database IndexedDB">
+      <created>1646467941797</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1646467941797</updated>
+    </task>
+    <task id="LOCAL-00012" summary="add database IndexedDB">
+      <created>1646468048164</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1646468048164</updated>
+    </task>
+    <task id="LOCAL-00013" summary="add categories to database">
+      <created>1646924719462</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1646924719462</updated>
+    </task>
+    <task id="LOCAL-00014" summary="save state app to database">
+      <created>1647006551816</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1647006551816</updated>
+    </task>
+    <task id="LOCAL-00015" summary="save state app to database">
+      <created>1647007028279</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1647007028279</updated>
+    </task>
+    <task id="LOCAL-00016" summary="save state app to database">
+      <created>1647007172837</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1647007172838</updated>
+    </task>
+    <task id="LOCAL-00017" summary="delete note and category">
+      <created>1647009033092</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1647009033092</updated>
+    </task>
+    <task id="LOCAL-00018" summary="highlighting selected category">
+      <created>1647010394776</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1647010394776</updated>
+    </task>
+    <task id="LOCAL-00019" summary="fix bags">
+      <created>1647849133702</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1647849133702</updated>
+    </task>
+    <task id="LOCAL-00020" summary="update state app">
+      <created>1647952851086</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1647952851086</updated>
+    </task>
+    <task id="LOCAL-00021" summary="fix bags: update app, search">
+      <created>1648026841953</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1648026841953</updated>
+    </task>
+    <task id="LOCAL-00022" summary="fix bags: update app">
+      <created>1648116308595</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1648116308595</updated>
+    </task>
+    <task id="LOCAL-00023" summary="final v1.0: fix bags">
+      <created>1648206326717</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1648206326717</updated>
+    </task>
+    <task id="LOCAL-00024" summary="final v1.0: fix bags">
+      <created>1648206567946</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1648206567946</updated>
+    </task>
+    <task id="LOCAL-00025" summary="final v1.0: fix bags">
+      <created>1648207649496</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1648207649496</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="dev" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="add .gitignore" />
+    <MESSAGE value="create categories field" />
+    <MESSAGE value="fix basis layout" />
+    <MESSAGE value="add webpack&#10;fix add category" />
+    <MESSAGE value="MVC pattern" />
+    <MESSAGE value="add, edit, delete category" />
+    <MESSAGE value="add note" />
+    <MESSAGE value="fix small bugs" />
+    <MESSAGE value="add translation, create Category, note" />
+    <MESSAGE value="add database IndexedDB" />
+    <MESSAGE value="add categories to database" />
+    <MESSAGE value="save state app to database" />
+    <MESSAGE value="delete note and category" />
+    <MESSAGE value="highlighting selected category" />
+    <MESSAGE value="fix bags" />
+    <MESSAGE value="update state app" />
+    <MESSAGE value="fix bags: update app, search" />
+    <MESSAGE value="fix bags: update app" />
+    <MESSAGE value="final v1.0: fix bags" />
+    <option name="LAST_COMMIT_MESSAGE" value="final v1.0: fix bags" />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>
