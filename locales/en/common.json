@@ -1,0 +1,15 @@
+{
+  "translation": {
+    "inputNameNewCategory": "New category",
+    "newNote": "New note",
+    "searchInput": "Search by notes",
+    "kebabMenu": {
+      "editButton": "Edit",
+      "deleteButton": "Delete"
+    },
+    "noteContent": {
+      "titleNote": "Title note",
+      "textNote": "Text note"
+    }
+  }
+}
