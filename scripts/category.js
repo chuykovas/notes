@@ -117,6 +117,33 @@ Category.prototype.sortNote = function (sortField) {
   this.renderAllNote();
 }
 
+Category.prototype.createNewNote = function () {
+  const date = Date.now();
+  const newNote = this.renderNote(this.state.id, null, null, date);
+
+  this.addNote(newNote);
+
+  this.state.selectedNote = newNote;
+  this.state.selectedNote.init();
+
+  this.store.set('general', 0, {
+    idSelectedCategory: this.state.id,
+    idSelectedNote: this.state.selectedNote.state.date,
+  });
+
+  this.renderAllNote();
+
+  this.store.set('notes', date, {
+    idCategory: this.state.id,
+    date: newNote.state.date,
+    title: newNote.state.title,
+    content: newNote.state.content,
+  });
+  //меняем количество заметок в категории
+  this.htmlContainer = this.renderCategory();
+  this.state.onUpdate();
+}
+
 Category.prototype.renderPopup = function () {
   const popupInputText = createElement('input', {
     className: 'popup-input',

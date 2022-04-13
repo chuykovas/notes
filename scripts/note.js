@@ -5,8 +5,8 @@ import Store from './store/store';
 export default function Note(params) {
   this.state = {
     idCategory: params.idCategory,
-    title: params.title,
-    content: params.content,
+    title: params.title || 'Заметка без названия',
+    content: params.content || '',
     date: params.date,
     onClick: params.onClick,
     onDelete: params.onDelete,
